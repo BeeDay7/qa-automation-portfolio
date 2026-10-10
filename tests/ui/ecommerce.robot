@@ -16,6 +16,7 @@ Resource          resources/common.resource
 Resource          resources/pages/login_page.resource
 Resource          resources/pages/products_page.resource
 Resource          resources/pages/cart_page.resource
+Resource          resources/pages/account_page.resource
 Suite Setup       Open Storefront
 Suite Teardown    Close Storefront
 Test Setup        Reset Storefront Session
@@ -130,3 +131,30 @@ DM-011 Cart Persists Across Page Reload
     Cart Count Should Be    1
     Open Cart Drawer
     Cart Total Should Be    34.50
+
+DM-012 Signed In User Reaches Account Page
+    [Documentation]    A signed-in user visits /account and sees their name
+    ...                reflected in the profile card.
+    [Tags]    smoke    functional    priority-high    account
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Go To Account Page
+    Account Page Should Show Name    Store Admin
+
+DM-013 Anonymous Visitor Sees Guest State On Account Page
+    [Documentation]    An anonymous visitor to /account sees the guest
+    ...                invitation rather than the profile card.
+    [Tags]    negative    priority-medium    account
+    Go To Account Page
+    Guest State Should Be Visible
+
+DM-014 Account Page Reflects Basket Count
+    [Documentation]    Items added to the basket appear in the account
+    ...                page's basket summary.
+    [Tags]    functional    priority-medium    account    cart
+    Add Product To Cart    Wireless Mouse
+    Add Product To Cart    USB-C Hub
+    Go To Account Page
+    Account Basket Count Should Be    2
+    Account Basket Total Should Be    54.49

@@ -40,6 +40,25 @@ def _base_context(request: Request) -> dict[str, Any]:
     }
 
 
+def _current_user(request: Request) -> dict[str, Any] | None:
+    """Return the current user record, or None if anonymous."""
+    email = request.session.get(USER_KEY)
+    if not email:
+        return None
+    record = USERS.get(email)
+    if record is None:
+        return None
+    return {"email": email, **record}
+
+
+def _cart_summary(request: Request) -> dict[str, Any]:
+    """Return a small summary of the current basket."""
+    items = list(request.session.get(CART_KEY, []))
+    count = sum(int(i.get("quantity", 0)) for i in items)
+    total = round(sum(float(i["price"]) * int(i["quantity"]) for i in items), 2)
+    return {"count": count, "total": total, "items": items}
+
+
 # ---------- pages ----------
 
 
@@ -75,17 +94,25 @@ async def product_detail(request: Request, product_id: int) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name="product.html", context=ctx)
 
 
+@router.get("/account", response_class=HTMLResponse, include_in_schema=False)
+async def account(request: Request) -> HTMLResponse:
+    user = _current_user(request)
+    ctx = _base_context(request)
+    ctx["user"] = user
+    ctx["basket"] = _cart_summary(request)
+    return templates.TemplateResponse(request=request, name="account.html", context=ctx)
+
+
 # ---------- session ----------
 
 
 @router.get("/api/session")
 async def read_session(request: Request) -> JSONResponse:
-    email = request.session.get(USER_KEY)
-    user = USERS.get(email) if email else None
+    user = _current_user(request)
     return JSONResponse(
         {
-            "authenticated": bool(user),
-            "email": email,
+            "authenticated": user is not None,
+            "email": user["email"] if user else None,
             "name": user["name"] if user else None,
             "role": user["role"] if user else None,
         }

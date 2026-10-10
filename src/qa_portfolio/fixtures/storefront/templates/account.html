@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Your account — {{ store.name }}{% endblock %}
+{% block description %}The register, the basket, and the ledger of your orders.{% endblock %}
+{% block page_id %}account{% endblock %}
+
+{% block content %}
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <div class="container breadcrumb-inner">
+    <a href="/">Home</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Account</span>
+  </div>
+</nav>
+
+<section class="account" aria-labelledby="account-heading">
+  <div class="container account-inner">
+
+    {% if user %}
+    <header class="account-header">
+      <p class="eyebrow">Your Account</p>
+      <h1 id="account-heading" class="account-title">
+        Welcome back, <em>{{ user.name }}</em>.
+      </h1>
+      <p class="account-sub">
+        You are signed in as <strong>{{ user.email }}</strong>.
+        {% if user.role == "admin" %}
+          You hold the keys to the register.
+        {% else %}
+          Your basket is kept for you between visits.
+        {% endif %}
+      </p>
+    </header>
+    {% else %}
+    <header class="account-header">
+      <p class="eyebrow">Guest</p>
+      <h1 id="guest-heading" class="account-title">
+        You are visiting as a guest.
+      </h1>
+      <p class="account-sub">
+        Sign the register to keep your basket between visits, and to see a
+        record of the orders you place through this store.
+      </p>
+    </header>
+    {% endif %}
+
+    <div class="account-grid">
+
+      {% if user %}
+      <article class="account-card">
+        <header class="account-card-header">
+          <p class="eyebrow">Profile</p>
+          <h2 class="account-card-title">The register</h2>
+        </header>
+        <dl class="account-details">
+          <div class="account-row">
+            <dt>Name</dt>
+            <dd>{{ user.name }}</dd>
+          </div>
+          <div class="account-row">
+            <dt>Email</dt>
+            <dd>{{ user.email }}</dd>
+          </div>
+          <div class="account-row">
+            <dt>Role</dt>
+            <dd>{{ user.role }}</dd>
+          </div>
+          <div class="account-row">
+            <dt>House</dt>
+            <dd>Est. {{ store.established }} · {{ store.address }}</dd>
+          </div>
+        </dl>
+      </article>
+      {% else %}
+      <article class="account-card account-card--quiet">
+        <header class="account-card-header">
+          <p class="eyebrow">Guest</p>
+          <h2 class="account-card-title">Sign the register</h2>
+        </header>
+        <p class="account-quiet-body">
+          Signing in keeps your basket between visits. It takes a moment,
+          and you are always welcome to browse as a guest.
+        </p>
+        <button
+          id="account-sign-in"
+          class="btn btn-primary"
+          type="button">
+          Sign the register
+        </button>
+      </article>
+      {% endif %}
+
+      <article class="account-card">
+        <header class="account-card-header">
+          <p class="eyebrow">Basket</p>
+          <h2 class="account-card-title">
+            {% if basket.count == 0 %}Nothing selected yet{% else %}Waiting for you{% endif %}
+          </h2>
+        </header>
+
+        <div class="account-basket">
+          <p class="account-basket-count">
+            <span id="account-basket-count">{{ basket.count }}</span>
+            <span class="account-basket-label">
+              {% if basket.count == 1 %}item{% else %}items{% endif %}
+            </span>
+          </p>
+          <p class="account-basket-total">
+            Subtotal
+            <strong>$<span id="account-basket-total">{{ "%.2f"|format(basket.total) }}</span></strong>
+          </p>
+        </div>
+
+        <div class="account-card-actions">
+          <button
+            id="account-open-basket"
+            class="btn btn-primary"
+            type="button">
+            Open the basket
+          </button>
+          <a class="btn btn-ghost" href="/">Continue browsing</a>
+        </div>
+      </article>
+
+      {% if user %}
+      <article class="account-card account-card--wide">
+        <header class="account-card-header">
+          <p class="eyebrow">Ledger</p>
+          <h2 class="account-card-title">Order history</h2>
+        </header>
+
+        <div class="account-empty">
+          <p class="account-empty-mark" aria-hidden="true">◦</p>
+          <p class="account-empty-title">No entries yet.</p>
+          <p class="account-empty-body">
+            Every order you place through this store is written into the
+            ledger. When you place your first order, it will appear here.
+          </p>
+        </div>
+      </article>
+
+      <article class="account-card account-card--quiet">
+        <header class="account-card-header">
+          <p class="eyebrow">Session</p>
+          <h2 class="account-card-title">Signing out</h2>
+        </header>
+        <p class="account-quiet-body">
+          Signing out clears your session on this device. Your basket will be
+          emptied. You are always welcome back.
+        </p>
+        <button
+          id="account-logout"
+          class="btn btn-ghost"
+          type="button">
+          Sign out
+        </button>
+      </article>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
