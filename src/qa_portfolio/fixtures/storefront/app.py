@@ -3,6 +3,7 @@
 The route handlers live in `routes.py`; this module wires middleware,
 templates, and static assets.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

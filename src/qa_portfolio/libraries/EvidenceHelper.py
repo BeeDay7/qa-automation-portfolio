@@ -4,11 +4,13 @@ metadata to a run-scoped JSON file.
 Designed to be called from `Test Teardown` and `Suite Teardown` so each test
 run produces a self-contained evidence bundle alongside Robot's own reports.
 """
+
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from robot.libraries.BuiltIn import BuiltIn
 
@@ -29,20 +31,20 @@ class EvidenceHelper:
         if status == "PASS":
             return
         name = builtin.get_variable_value("${TEST NAME}", default="unnamed")
-        safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in name)
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in str(name))
+        timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
         target = self._dir / f"{safe}_{timestamp}.png"
         try:
-            selenium = builtin.get_library_instance("SeleniumLibrary")
+            selenium: Any = builtin.get_library_instance("SeleniumLibrary")
             selenium.capture_page_screenshot(str(target))
-        except Exception as exc:  # noqa: BLE001 - best-effort
+        except Exception as exc:
             builtin.log(f"Screenshot skipped: {exc}", level="WARN")
 
     def record_run_metadata(self, extra: dict[str, object] | None = None) -> str:
         """Write a small JSON file summarising the current run."""
         builtin = BuiltIn()
         payload = {
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "generated_at_utc": datetime.now(UTC).isoformat(),
             "suite": builtin.get_variable_value("${SUITE NAME}", default=""),
             "test": builtin.get_variable_value("${TEST NAME}", default=""),
             "status": builtin.get_variable_value("${TEST STATUS}", default=""),

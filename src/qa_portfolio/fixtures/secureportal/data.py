@@ -1,4 +1,5 @@
 """In-memory user directory for the SecurePortal fixture."""
+
 from __future__ import annotations
 
 from typing import Final

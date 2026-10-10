@@ -3,6 +3,7 @@
 Produces structured, single-line logs that are easy to read in a terminal and
 easy to parse in CI.
 """
+
 from __future__ import annotations
 
 import logging

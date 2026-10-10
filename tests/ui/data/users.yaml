@@ -1,7 +1,7 @@
 valid_user:
-  email: tester@example.com
-  password: DemoPass123!
+  email: admin@azamtradingstore.com
+  password: AzamAdmin!2026
 
 invalid_user:
-  email: attacker@example.com
-  password: wrong-password
+  email: intruder@example.com
+  password: WrongPassword123!

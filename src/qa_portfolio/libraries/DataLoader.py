@@ -1,4 +1,5 @@
 """Robot Framework library for loading structured test data from disk."""
+
 from __future__ import annotations
 
 import json

@@ -25,11 +25,10 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "robotframework>=7.0",
-    "robotframework-seleniumlibrary>=6.6",
+    "robotframework-seleniumlibrary>=6.6,<7",
     "robotframework-requests>=0.9.7",
     "selenium>=4.24",
     "requests>=2.32",
-    "pabot>=2.18",
 ]
 dev = [
     "ruff>=0.6",
@@ -40,8 +39,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-handle/qa-automation-portfolio"
-Issues = "https://github.com/your-handle/qa-automation-portfolio/issues"
+Homepage = "https://github.com/beeday7/qa-automation-portfolio"
+Issues = "https://github.com/beeday7/qa-automation-portfolio/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -53,10 +52,12 @@ src = ["src", "tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "S", "C4", "SIM", "N", "RUF"]
-ignore = ["S101"]  # asserts are acceptable in test code
+ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106"]
+"src/qa_portfolio/libraries/*.py" = ["N999"]
+"scripts/**" = ["S603"]
 
 [tool.mypy]
 python_version = "3.11"

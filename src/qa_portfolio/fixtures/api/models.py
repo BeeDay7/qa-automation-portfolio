@@ -1,4 +1,5 @@
 """Pydantic response models for the mock product API."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel

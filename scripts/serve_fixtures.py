@@ -5,6 +5,7 @@ Usage:
     python scripts/serve_fixtures.py --background    # detach, write PIDs
     python scripts/serve_fixtures.py --stop          # stop detached servers
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,16 +20,26 @@ ROOT = Path(__file__).resolve().parents[1]
 PID_DIR = ROOT / ".fixture-pids"
 
 FIXTURES = [
-    ("storefront",   "qa_portfolio.fixtures.storefront.app:app",   8001),
+    ("storefront", "qa_portfolio.fixtures.storefront.app:app", 8001),
     ("secureportal", "qa_portfolio.fixtures.secureportal.app:app", 8002),
-    ("api",          "qa_portfolio.fixtures.api.app:app",          8003),
+    ("api", "qa_portfolio.fixtures.api.app:app", 8003),
 ]
 
 
 def _spawn(target: str, port: int) -> subprocess.Popen[bytes]:
     env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
-    cmd = [sys.executable, "-m", "uvicorn", target,
-           "--host", "127.0.0.1", "--port", str(port), "--log-level", "info"]
+    cmd = [
+        sys.executable,
+        "-m",
+        "uvicorn",
+        target,
+        "--host",
+        "127.0.0.1",
+        "--port",
+        str(port),
+        "--log-level",
+        "info",
+    ]
     return subprocess.Popen(cmd, cwd=ROOT, env=env)
 
 

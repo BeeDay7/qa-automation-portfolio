@@ -3,6 +3,7 @@
 Demonstrates a clean, typed REST surface with OpenAPI available at /docs for
 developer inspection. Not a production service.
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query

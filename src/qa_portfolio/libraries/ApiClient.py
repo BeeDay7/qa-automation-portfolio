@@ -3,6 +3,7 @@
 Centralises base-URL handling, JSON decoding, and response assertion helpers
 so API suites stay readable.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -22,15 +23,11 @@ class ApiClient:
 
     def get(self, path: str, params: dict[str, Any] | None = None) -> requests.Response:
         """GET `path` and return the raw response object."""
-        return self._session.get(
-            f"{self._base_url}{path}", params=params, timeout=self._timeout
-        )
+        return self._session.get(f"{self._base_url}{path}", params=params, timeout=self._timeout)
 
     def post(self, path: str, json: dict[str, Any] | None = None) -> requests.Response:
         """POST JSON to `path` and return the raw response object."""
-        return self._session.post(
-            f"{self._base_url}{path}", json=json, timeout=self._timeout
-        )
+        return self._session.post(f"{self._base_url}{path}", json=json, timeout=self._timeout)
 
     def expect_status(self, response: requests.Response, expected: int) -> None:
         """Raise AssertionError if `response.status_code` != `expected`."""

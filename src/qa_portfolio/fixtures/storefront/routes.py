@@ -1,17 +1,19 @@
-"""HTTP routes for the DemoMart storefront fixture."""
+"""HTTP routes for the Azam Trading Store fixture."""
+
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from .data import PRODUCTS, USERS
+from .data import PRODUCTS, STORE, USERS
 from .models import AddItemRequest, CartItem, CartView, LoginRequest, Product
 
 BASE_DIR = Path(__file__).parent
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 router = APIRouter()
 CART_KEY = "cart"
@@ -26,7 +28,7 @@ async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"products": PRODUCTS},
+        context={"products": PRODUCTS, "store": STORE},
     )
 
 
@@ -68,11 +70,7 @@ async def logout(request: Request) -> JSONResponse:
 @router.get("/api/products")
 async def list_products(q: str = "") -> JSONResponse:
     needle = q.strip().lower()
-    items = (
-        [p for p in PRODUCTS if needle in str(p["name"]).lower()]
-        if needle
-        else list(PRODUCTS)
-    )
+    items = [p for p in PRODUCTS if needle in str(p["name"]).lower()] if needle else list(PRODUCTS)
     return JSONResponse({"items": items, "count": len(items)})
 
 
@@ -81,14 +79,14 @@ async def get_product(product_id: int) -> JSONResponse:
     item = next((p for p in PRODUCTS if p["id"] == product_id), None)
     if item is None:
         raise HTTPException(status_code=404, detail="product_not_found")
-    return JSONResponse(Product(**item).model_dump())
+    return JSONResponse(Product.model_validate(item).model_dump())
 
 
 # ---------- cart ----------
 
 
-def _cart_view(items: list[dict[str, object]]) -> CartView:
-    view_items = [CartItem(**item) for item in items]
+def _cart_view(items: list[dict[str, Any]]) -> CartView:
+    view_items = [CartItem.model_validate(item) for item in items]
     total = round(sum(i.price * i.quantity for i in view_items), 2)
     return CartView(items=view_items, count=sum(i.quantity for i in view_items), total=total)
 

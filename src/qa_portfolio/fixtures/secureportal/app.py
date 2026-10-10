@@ -1,4 +1,5 @@
 """FastAPI application for the SecurePortal fixture."""
+
 from __future__ import annotations
 
 from pathlib import Path
