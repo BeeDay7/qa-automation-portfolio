@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from itertools import count
 from pathlib import Path
 from typing import Any
 
@@ -31,15 +32,15 @@ USER_KEY = "user_email"
 
 CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)
 
-# In-memory contact inbox. Resets on fixture restart. Reachable only by
-# admin sessions via /api/contact/log. Used to demonstrate that submitted
-# messages actually reach the shop and can be reviewed by the operator.
+# In-memory contact inbox. Available only to admin sessions.
 CONTACT_LOG: list[dict[str, Any]] = []
+
+# In-memory order ledger. Resets on fixture restart. Keyed by order id.
+ORDERS: dict[int, dict[str, Any]] = {}
+_order_ids = count(1)
 
 
 class ContactBody(BaseModel):
-    """Payload for the contact form."""
-
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     subject: str = Field(default="General enquiry", max_length=120)
@@ -71,6 +72,21 @@ def _cart_summary(request: Request) -> dict[str, Any]:
     count = sum(int(i.get("quantity", 0)) for i in items)
     total = round(sum(float(i["price"]) * int(i["quantity"]) for i in items), 2)
     return {"count": count, "total": total, "items": items}
+
+
+def _user_orders(email: str) -> list[dict[str, Any]]:
+    """Return this user's orders, newest first, with display fields attached."""
+    rows = [o for o in ORDERS.values() if o["customer_email"] == email]
+    rows.sort(key=lambda o: o["id"], reverse=True)
+    return [
+        {
+            **order,
+            "created_at_display": order["created_at"].strftime("%d %B %Y"),
+            "created_at_display_long": order["created_at"].strftime("%d %B %Y, %H:%M UTC"),
+            "item_count": sum(int(i["quantity"]) for i in order["items"]),
+        }
+        for order in rows
+    ]
 
 
 # ---------- pages ----------
@@ -117,7 +133,32 @@ async def account(request: Request) -> HTMLResponse:
     ctx["basket"] = _cart_summary(request)
     ctx["is_admin"] = bool(user and user.get("role") == "admin")
     ctx["inbox_count"] = len(CONTACT_LOG) if ctx["is_admin"] else 0
+    ctx["orders"] = _user_orders(user["email"]) if user else []
     return templates.TemplateResponse(request=request, name="account.html", context=ctx)
+
+
+@router.get("/order/{order_id}", response_class=HTMLResponse, include_in_schema=False)
+async def order_detail(request: Request, order_id: int) -> HTMLResponse:
+    order = ORDERS.get(order_id)
+    current_email = request.session.get(USER_KEY)
+
+    # Privacy: an order is only visible to the session that placed it. Any
+    # other caller — anonymous or authenticated as a different user — sees
+    # the not-found page. This is the standard pattern for order receipts.
+    if order is None or order["customer_email"] != current_email:
+        return templates.TemplateResponse(
+            request=request,
+            name="not_found.html",
+            context={**_base_context(request), "message": "We have no record of that order."},
+            status_code=404,
+        )
+
+    ctx = _base_context(request)
+    ctx["order"] = {
+        **order,
+        "created_at_display": order["created_at"].strftime("%d %B %Y, %H:%M UTC"),
+    }
+    return templates.TemplateResponse(request=request, name="order.html", context=ctx)
 
 
 @router.get("/journal", response_class=HTMLResponse, include_in_schema=False)
@@ -213,7 +254,6 @@ async def submit_contact(body: ContactBody) -> JSONResponse:
 
 @router.get("/api/contact/log")
 async def contact_log(request: Request) -> JSONResponse:
-    """Return the inbox. Available only to admin sessions."""
     user = _current_user(request)
     if not user or user.get("role") != "admin":
         return JSONResponse({"error": "forbidden"}, status_code=403)
@@ -286,10 +326,66 @@ async def clear_cart(request: Request) -> JSONResponse:
 
 @router.post("/api/checkout")
 async def checkout(request: Request) -> JSONResponse:
-    if not request.session.get(USER_KEY):
-        return JSONResponse({"message": "Please sign in before checkout."}, status_code=401)
-    items = request.session.get(CART_KEY, [])
+    email = request.session.get(USER_KEY)
+    if not email:
+        return JSONResponse(
+            {"message": "Please sign in before checkout."},
+            status_code=401,
+        )
+
+    items = list(request.session.get(CART_KEY, []))
     if not items:
         return JSONResponse({"message": "Your cart is empty."})
+
+    subtotal = round(sum(float(i["price"]) * int(i["quantity"]) for i in items), 2)
+    order_id = next(_order_ids)
+
+    ORDERS[order_id] = {
+        "id": order_id,
+        "created_at": datetime.now(UTC),
+        "customer_email": str(email),
+        "items": [
+            {
+                "id": int(i["id"]),
+                "name": str(i["name"]),
+                "price": float(i["price"]),
+                "quantity": int(i["quantity"]),
+            }
+            for i in items
+        ],
+        "subtotal": subtotal,
+        "total": subtotal,
+        "status": "received",
+    }
     request.session[CART_KEY] = []
-    return JSONResponse({"message": "Order submitted successfully (demo)."})
+
+    return JSONResponse(
+        {
+            "ok": True,
+            "order_id": order_id,
+            "message": "Order received.",
+        }
+    )
+
+
+@router.get("/api/orders")
+async def list_orders(request: Request) -> JSONResponse:
+    user = _current_user(request)
+    if user is None:
+        return JSONResponse({"error": "unauthorised"}, status_code=401)
+    orders = _user_orders(user["email"])
+    return JSONResponse(
+        {
+            "orders": [
+                {
+                    "id": o["id"],
+                    "created_at": o["created_at_display_long"],
+                    "item_count": o["item_count"],
+                    "total": o["total"],
+                    "status": o["status"],
+                }
+                for o in orders
+            ],
+            "count": len(orders),
+        }
+    )

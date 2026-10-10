@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} — {{ store.name }}{% endblock %}
+{% block description %}Your order slip from {{ store.name }}.{% endblock %}
+{% block page_id %}order{% endblock %}
+
+{% block content %}
+
+<section class="order" aria-labelledby="order-heading">
+  <div class="container order-inner">
+
+    <header class="order-header">
+      <p class="eyebrow">Order confirmed</p>
+      <h1 id="order-heading" class="order-title">
+        Thank you. Your order is written in the ledger.
+      </h1>
+      <p class="order-lede">
+        We have your basket. We will write to you at
+        <strong>{{ order.customer_email }}</strong> within one working day
+        with dispatch details.
+      </p>
+    </header>
+
+    <article class="order-slip" aria-label="Order slip">
+
+      <header class="order-slip-header">
+        <div class="order-slip-ref">
+          <p class="order-slip-label">Order</p>
+          <p class="order-slip-number">#{{ order.id }}</p>
+        </div>
+        <div class="order-slip-meta">
+          <p class="order-slip-meta-line">{{ order.created_at_display }}</p>
+          <p class="order-slip-meta-line">
+            {{ store.name }} · {{ store.address }}
+          </p>
+        </div>
+      </header>
+
+      <ul class="order-items" role="list">
+        {% for item in order.items %}
+        <li class="order-item">
+          <div class="order-item-detail">
+            <p class="order-item-name">{{ item.name }}</p>
+            <p class="order-item-qty">× {{ item.quantity }}</p>
+          </div>
+          <span class="order-item-price">
+            ${{ "%.2f"|format(item.price * item.quantity) }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <div class="order-totals">
+        <div class="order-total-row">
+          <span class="order-total-label">Subtotal</span>
+          <span class="order-total-value">${{ "%.2f"|format(order.subtotal) }}</span>
+        </div>
+        <div class="order-total-row order-total-row--final">
+          <span class="order-total-label">Total</span>
+          <strong class="order-total-final">${{ "%.2f"|format(order.total) }}</strong>
+        </div>
+      </div>
+
+      <footer class="order-slip-footer">
+        <p class="order-slip-note">
+          Every item is inspected in Abuja before it ships. Wrapped by hand,
+          with a note from the keeper.
+        </p>
+      </footer>
+
+    </article>
+
+    <div class="order-actions">
+      <a class="btn btn-primary" href="/">Continue browsing</a>
+      <a class="btn btn-ghost" href="/account">View your account</a>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

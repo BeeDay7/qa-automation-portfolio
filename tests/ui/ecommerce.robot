@@ -19,6 +19,7 @@ Resource          resources/pages/cart_page.resource
 Resource          resources/pages/account_page.resource
 Resource          resources/pages/journal_page.resource
 Resource          resources/pages/contact_page.resource
+Resource          resources/pages/order_page.resource
 Suite Setup       Open Storefront
 Suite Teardown    Close Storefront
 Test Setup        Reset Storefront Session
@@ -290,3 +291,77 @@ DM-026 Inbox API Rejects Anonymous Callers
     Create Session    anon    ${BASE_URL}    verify=False
     ${resp}=    GET On Session    anon    /api/contact/log    expected_status=403
     Should Be Equal    ${resp.json()}[error]    forbidden
+
+DM-027 Checkout Redirects To Order Confirmation
+    [Documentation]    A signed-in user with items in their basket checks
+    ...                out and reaches /order/{id}.
+    [Tags]    smoke    functional    priority-high    checkout    order
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Add Product To Cart    USB-C Hub
+    Cart Count Should Be    1
+    Open Cart Drawer
+    Click Checkout
+    Wait Until Location Contains    /order/    timeout=5s
+    Order Page Should Be Visible
+    Order Should Contain Product    USB-C Hub
+    Order Total Should Be    $34.50
+
+DM-028 Order Confirmation Shows Multiple Items And Combined Total
+    [Documentation]    An order for two products shows both items and the
+    ...                correct combined total.
+    [Tags]    functional    priority-high    order
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Add Product To Cart    Wireless Mouse
+    Add Product To Cart    USB-C Hub
+    Open Cart Drawer
+    Click Checkout
+    Wait Until Location Contains    /order/    timeout=5s
+    Order Should Contain Product    Wireless Mouse
+    Order Should Contain Product    USB-C Hub
+    Order Total Should Be    $54.49
+
+DM-029 Order Appears In Account Ledger
+    [Documentation]    An order placed at checkout appears in the account
+    ...                page ledger on the next visit.
+    [Tags]    functional    priority-high    order    account
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Add Product To Cart    Wireless Mouse
+    Open Cart Drawer
+    Click Checkout
+    Wait Until Location Contains    /order/    timeout=5s
+    Go To Account Page
+    Ledger Should Be Visible
+    Page Should Contain Element    xpath=//a[contains(@class,'ledger-entry-link')]
+
+DM-030 Order Page Is Not Visible To A Different Session
+    [Documentation]    An order created by one session is not visible to an
+    ...                anonymous visitor.
+    [Tags]    negative    priority-high    order
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Add Product To Cart    Wireless Mouse
+    Open Cart Drawer
+    Click Checkout
+    Wait Until Location Contains    /order/    timeout=5s
+    ${order_url}=    Get Location
+    Reset Storefront Session
+    Go To    ${order_url}
+    Wait Until Page Contains    no record of that order    timeout=5s
+
+DM-031 Checkout With Empty Cart Shows Message
+    [Documentation]    A signed-in user with an empty basket receives the
+    ...                "cart is empty" message rather than an order page.
+    [Tags]    negative    priority-medium    checkout
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Open Cart Drawer
+    Click Checkout
+    Checkout Message Should Contain    Your cart is empty.

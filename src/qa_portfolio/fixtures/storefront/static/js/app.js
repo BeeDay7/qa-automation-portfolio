@@ -392,12 +392,19 @@
     });
 
     $("#checkout")?.addEventListener("click", async () => {
-      const { ok, body } = await api("/api/checkout", { method: "POST" });
       const status = $("#message");
-      if (!status) return;
-      status.textContent = body.message || "";
-      status.classList.toggle("is-error", !ok);
-      status.classList.toggle("is-success", ok);
+      const { ok, body } = await api("/api/checkout", { method: "POST" });
+
+      if (ok && body.order_id) {
+        window.location.href = `/order/${body.order_id}`;
+        return;
+      }
+
+      if (status) {
+        status.textContent = body.message || "Something went wrong.";
+        status.classList.toggle("is-error", !ok);
+        status.classList.toggle("is-success", false);
+      }
     });
   };
 

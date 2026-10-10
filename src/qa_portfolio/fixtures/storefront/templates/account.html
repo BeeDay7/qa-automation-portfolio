@@ -157,12 +157,37 @@
       {% endif %}
 
       {% if user %}
-      <article class="account-card account-card--wide">
+      <article class="account-card account-card--wide" id="ledger-card">
         <header class="account-card-header">
           <p class="eyebrow">Ledger</p>
           <h2 class="account-card-title">Order history</h2>
         </header>
 
+        {% if orders %}
+        <ul class="ledger-list" role="list">
+          {% for order in orders %}
+          <li class="ledger-entry">
+            <a href="/order/{{ order.id }}" class="ledger-entry-link">
+              <div class="ledger-entry-detail">
+                <p class="ledger-entry-number">Order #{{ order.id }}</p>
+                <p class="ledger-entry-meta">
+                  {{ order.created_at_display }}
+                  · {{ order.item_count }}
+                  {% if order.item_count == 1 %}item{% else %}items{% endif %}
+                </p>
+              </div>
+              <div class="ledger-entry-total">
+                <span class="ledger-entry-total-label">Total</span>
+                <strong class="ledger-entry-total-value">
+                  ${{ "%.2f"|format(order.total) }}
+                </strong>
+              </div>
+              <span class="ledger-entry-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
         <div class="account-empty">
           <p class="account-empty-mark" aria-hidden="true">◦</p>
           <p class="account-empty-title">No entries yet.</p>
@@ -171,6 +196,7 @@
             ledger. When you place your first order, it will appear here.
           </p>
         </div>
+        {% endif %}
       </article>
 
       <article class="account-card account-card--quiet">
