@@ -37,7 +37,7 @@
       </header>
 
       <ul class="order-items" role="list">
-        {% for item in order.items %}
+        {% for item in order["items"] %}
         <li class="order-item">
           <div class="order-item-detail">
             <p class="order-item-name">{{ item.name }}</p>
