@@ -24,6 +24,7 @@ Suite Teardown    Close Storefront
 Test Setup        Reset Storefront Session
 Test Teardown     Run Keyword If Test Failed    Capture On Failure
 Test Tags         ui    storefront    portfolio
+Library           RequestsLibrary
 
 *** Variables ***
 ${USERS_FILE}    tests/ui/data/users.yaml
@@ -256,3 +257,36 @@ DM-023 Contact Form Rejects Empty Name
     Submit Contact Form
     Sleep    0.5s
     Contact Status Should Not Contain Success
+
+DM-024 Admin Inbox Shows Submitted Contact Messages
+    [Documentation]    A contact form submission appears in the admin
+    ...                inbox on the account page.
+    [Tags]    smoke    functional    priority-high    admin    contact
+    Go To Contact Page
+    Fill Contact Form
+    ...    Ada Visitor
+    ...    ada@example.com
+    ...    A question about shipping
+    ...    I would like to know how long delivery takes within Abuja.
+    Submit Contact Form
+    Contact Status Should Contain    Your note has reached the shop
+    ${users}=    Load Yaml File    ${USERS_FILE}
+    ${u}=        Set Variable    ${users}[valid_user]
+    Go To    ${BASE_URL}
+    Sign In With Credentials    ${u}[email]    ${u}[password]
+    Go To Account Page
+    Click Inbox Refresh
+    Inbox Should Show Message From    Ada Visitor
+
+DM-025 Inbox Is Hidden From Non-Admin Sessions
+    [Documentation]    An anonymous visitor to /account sees no inbox card.
+    [Tags]    negative    priority-medium    admin
+    Go To Account Page
+    Page Should Not Contain Element    id=inbox-card
+
+DM-026 Inbox API Rejects Anonymous Callers
+    [Documentation]    The /api/contact/log endpoint refuses anonymous access.
+    [Tags]    api    negative    priority-high    admin
+    Create Session    anon    ${BASE_URL}    verify=False
+    ${resp}=    GET On Session    anon    /api/contact/log    expected_status=403
+    Should Be Equal    ${resp.json()}[error]    forbidden

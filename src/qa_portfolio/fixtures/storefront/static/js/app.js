@@ -288,6 +288,47 @@
     });
   };
 
+  /* ---------- account inbox (admin only) ----------------------------- */
+
+  const renderInbox = (messages) => {
+    const list = document.getElementById("inbox-list");
+    if (!list) return;
+
+    if (!messages || messages.length === 0) {
+      list.innerHTML = `<p class="inbox-empty">No messages yet. Write to us through the contact page and they will appear here.</p>`;
+      return;
+    }
+
+    list.innerHTML = messages.map((msg) => `
+      <article class="inbox-message">
+        <header class="inbox-message-head">
+          <p class="inbox-from">${escapeHtml(msg.name)}</p>
+          <p class="inbox-email">${escapeHtml(msg.email)}</p>
+          <span class="inbox-time">${escapeHtml(msg.received_at)}</span>
+        </header>
+        <p class="inbox-subject">${escapeHtml(msg.subject)}</p>
+        <p class="inbox-body">${escapeHtml(msg.message)}</p>
+      </article>
+    `).join("");
+  };
+
+  const initInbox = () => {
+    const refreshBtn = document.getElementById("inbox-refresh");
+    if (!refreshBtn) return;
+
+    refreshBtn.addEventListener("click", async () => {
+      const list = document.getElementById("inbox-list");
+      const { ok, status, body } = await api("/api/contact/log");
+      if (!ok) {
+        if (list) {
+          list.innerHTML = `<p class="inbox-error">Forbidden — HTTP ${status}</p>`;
+        }
+        return;
+      }
+      renderInbox(body.messages);
+    });
+  };
+
   /* ---------- global event wiring ------------------------------------ */
 
   const wireEvents = () => {
@@ -367,6 +408,7 @@
     initSearch();
     initProductDetail();
     initContactForm();
+    initInbox();
     wireEvents();
 
     if (productListEl) {

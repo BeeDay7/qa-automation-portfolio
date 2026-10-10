@@ -49,3 +49,12 @@ Click Account Sign In
 Click Account Logout
     [Documentation]    Click the account page's "Sign out" button.
     Click Safely    ${ACCOUNT_LOGOUT}
+
+Click Inbox Refresh
+    [Documentation]    Click the "Load messages" button on the admin inbox.
+    Click Safely    id=inbox-refresh
+
+Inbox Should Show Message From
+    [Documentation]    Assert the inbox contains a message from the given name.
+    [Arguments]    ${name}
+    Wait Until Element Contains    id=inbox-list    ${name}    timeout=5s

@@ -3514,3 +3514,113 @@ body {
     padding: var(--s-5);
   }
 }
+
+/* ==========================================================================
+   22. Account inbox (admin only)
+   ========================================================================== */
+
+.inbox-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--forest);
+  color: var(--paper);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+}
+
+.inbox-empty {
+  padding: var(--s-6);
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-muted);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-warm);
+  margin: 0;
+}
+
+.inbox-message {
+  padding: var(--s-5);
+  background: var(--surface-warm);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.inbox-message-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.inbox-from {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ink);
+  margin: 0;
+}
+
+.inbox-email {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.inbox-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+}
+
+.inbox-subject {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0;
+}
+
+.inbox-body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule-faint);
+}
+
+.inbox-error {
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--danger);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: 1px dashed var(--danger);
+  border-radius: var(--r-md);
+  background: var(--danger-soft);
+  margin: 0;
+}

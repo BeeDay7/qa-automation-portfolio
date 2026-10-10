@@ -31,10 +31,10 @@ USER_KEY = "user_email"
 
 CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)
 
-# In-memory contact log. Resets on fixture restart. Used by the fixture to
-# demonstrate that form submissions actually arrive at the server. Not a
-# mail queue. Not persistent. Not exposed via any API endpoint.
-CONTACT_LOG: list[dict[str, str]] = []
+# In-memory contact inbox. Resets on fixture restart. Reachable only by
+# admin sessions via /api/contact/log. Used to demonstrate that submitted
+# messages actually reach the shop and can be reviewed by the operator.
+CONTACT_LOG: list[dict[str, Any]] = []
 
 
 class ContactBody(BaseModel):
@@ -47,7 +47,6 @@ class ContactBody(BaseModel):
 
 
 def _base_context(request: Request) -> dict[str, Any]:
-    """Common template context every page needs."""
     return {
         "store": STORE,
         "categories": CATEGORIES,
@@ -58,7 +57,6 @@ def _base_context(request: Request) -> dict[str, Any]:
 
 
 def _current_user(request: Request) -> dict[str, Any] | None:
-    """Return the current user record, or None if anonymous."""
     email = request.session.get(USER_KEY)
     if not email:
         return None
@@ -69,7 +67,6 @@ def _current_user(request: Request) -> dict[str, Any] | None:
 
 
 def _cart_summary(request: Request) -> dict[str, Any]:
-    """Return a small summary of the current basket."""
     items = list(request.session.get(CART_KEY, []))
     count = sum(int(i.get("quantity", 0)) for i in items)
     total = round(sum(float(i["price"]) * int(i["quantity"]) for i in items), 2)
@@ -118,6 +115,8 @@ async def account(request: Request) -> HTMLResponse:
     ctx = _base_context(request)
     ctx["user"] = user
     ctx["basket"] = _cart_summary(request)
+    ctx["is_admin"] = bool(user and user.get("role") == "admin")
+    ctx["inbox_count"] = len(CONTACT_LOG) if ctx["is_admin"] else 0
     return templates.TemplateResponse(request=request, name="account.html", context=ctx)
 
 
@@ -191,14 +190,15 @@ async def logout(request: Request) -> JSONResponse:
 
 @router.post("/api/contact")
 async def submit_contact(body: ContactBody) -> JSONResponse:
-    CONTACT_LOG.append(
+    CONTACT_LOG.insert(
+        0,
         {
-            "received_at": datetime.now(UTC).isoformat(),
+            "received_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "name": body.name,
             "email": str(body.email),
             "subject": body.subject,
             "message": body.message,
-        }
+        },
     )
     return JSONResponse(
         {
@@ -209,6 +209,15 @@ async def submit_contact(body: ContactBody) -> JSONResponse:
             ),
         }
     )
+
+
+@router.get("/api/contact/log")
+async def contact_log(request: Request) -> JSONResponse:
+    """Return the inbox. Available only to admin sessions."""
+    user = _current_user(request)
+    if not user or user.get("role") != "admin":
+        return JSONResponse({"error": "forbidden"}, status_code=403)
+    return JSONResponse({"messages": CONTACT_LOG, "count": len(CONTACT_LOG)})
 
 
 # ---------- catalogue ----------

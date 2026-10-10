@@ -123,6 +123,39 @@
         </div>
       </article>
 
+      {% if is_admin %}
+      <article class="account-card account-card--wide" id="inbox-card">
+        <header class="account-card-header">
+          <p class="eyebrow">Operator only</p>
+          <h2 class="account-card-title">
+            The inbox
+            {% if inbox_count %}
+              <span class="inbox-badge" id="inbox-count">{{ inbox_count }}</span>
+            {% endif %}
+          </h2>
+        </header>
+
+        <p class="account-quiet-body">
+          Every message sent through the contact form lands here. This view
+          is available only to <code>role=admin</code> sessions. Non-admin
+          sessions receive <code>HTTP 403</code>.
+        </p>
+
+        <div class="account-card-actions">
+          <button
+            id="inbox-refresh"
+            class="btn btn-primary btn-sm"
+            type="button">
+            Load messages
+          </button>
+        </div>
+
+        <div id="inbox-list" class="inbox-list">
+          <p class="inbox-empty">Press <strong>Load messages</strong> to fetch the inbox.</p>
+        </div>
+      </article>
+      {% endif %}
+
       {% if user %}
       <article class="account-card account-card--wide">
         <header class="account-card-header">
