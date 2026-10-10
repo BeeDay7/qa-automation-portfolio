@@ -189,3 +189,37 @@ DM-017 Article Shows Related Products And Other Notes
     Article Title Should Be    Wrapped by hand
     Wait Until Element Is Visible    css=.journal-related    timeout=5s
     Other Notes Should Be Listed
+
+DM-018 Journal Link Present In Header On Every Page
+    [Documentation]    The header navigation reaches the Journal from the
+    ...                home page, a product detail page, the account page,
+    ...                and the journal index itself.
+    [Tags]    smoke    functional    priority-high    navigation
+    Go To    ${BASE_URL}
+    Page Should Contain Element    css=.primary-nav a[data-nav='journal']
+    Go To    ${BASE_URL}/product/1
+    Page Should Contain Element    css=.primary-nav a[data-nav='journal']
+    Go To    ${BASE_URL}/account
+    Page Should Contain Element    css=.primary-nav a[data-nav='journal']
+    Go To    ${BASE_URL}/journal
+    Page Should Contain Element    css=.primary-nav a[data-nav='journal']
+
+DM-019 Header Journal Link Navigates From Home
+    [Documentation]    Clicking the Journal link in the header navigates to
+    ...                /journal and renders the index page.
+    [Tags]    smoke    functional    priority-high    navigation
+    Go To    ${BASE_URL}
+    Click Safely    css=.primary-nav a[data-nav='journal']
+    Wait Until Location Contains    /journal    timeout=5s
+    Wait Until Element Is Visible    id=journal-heading    timeout=5s
+
+DM-020 Footer Links Reach All Primary Pages
+    [Documentation]    The footer contains links to the Journal and Account
+    ...                and both resolve correctly.
+    [Tags]    functional    priority-medium    navigation
+    Go To    ${BASE_URL}
+    Page Should Contain Element    css=.footer-links a[data-nav='journal']
+    Page Should Contain Element    css=.footer-links a[data-nav='account']
+    Click Safely    css=.footer-links a[data-nav='journal']
+    Wait Until Location Contains    /journal    timeout=5s
+    Wait Until Element Is Visible    id=journal-heading    timeout=5s

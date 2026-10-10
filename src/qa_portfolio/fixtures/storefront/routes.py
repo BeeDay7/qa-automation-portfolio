@@ -67,6 +67,7 @@ def _cart_summary(request: Request) -> dict[str, Any]:
 async def index(request: Request) -> HTMLResponse:
     ctx = _base_context(request)
     ctx["products"] = PRODUCTS
+    ctx["latest_articles"] = JOURNAL
     return templates.TemplateResponse(request=request, name="index.html", context=ctx)
 
 

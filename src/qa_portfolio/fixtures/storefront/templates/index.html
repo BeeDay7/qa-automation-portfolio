@@ -7,7 +7,7 @@
 {% block content %}
 
 <!-- ==================================================================
-     Hero — the title page of the ledger
+     Hero
      ================================================================== -->
 <section class="hero" aria-labelledby="hero-title">
   <div class="container hero-inner">
@@ -44,7 +44,7 @@
           <span class="hero-mark-label">items in stock</span>
         </li>
         <li>
-          <span class="hero-mark-num">{{ categories | length - 1 }}</span>
+          <span class="hero-mark-num">{{ category_count }}</span>
           <span class="hero-mark-label">categories</span>
         </li>
         <li>
@@ -71,7 +71,7 @@
 </section>
 
 <!-- ==================================================================
-     Catalogue — the merchant's index
+     Catalogue
      ================================================================== -->
 <section id="catalogue" class="catalogue" aria-labelledby="catalogue-heading">
   <div class="container">
@@ -109,12 +109,14 @@
         data-category="{{ product.category }}">
 
         <div class="product-media">
-          <img
-            src="{{ product.image }}"
-            alt="{{ product.name }}"
-            loading="lazy"
-            width="400"
-            height="300">
+          <a href="/product/{{ product.id }}" aria-label="{{ product.name }}">
+            <img
+              src="{{ product.image }}"
+              alt="{{ product.name }}"
+              loading="lazy"
+              width="400"
+              height="300">
+          </a>
           {% if product.stock == 0 %}
             <span class="product-badge">Sold out</span>
           {% elif product.featured %}
@@ -124,7 +126,9 @@
 
         <div class="product-body">
           <p class="product-category">{{ product.category }}</p>
-          <h3 class="product-name">{{ product.name }}</h3>
+          <h3 class="product-name">
+            <a href="/product/{{ product.id }}">{{ product.name }}</a>
+          </h3>
           <p class="product-description">{{ product.description }}</p>
 
           <dl class="product-specs">
@@ -172,7 +176,56 @@
 </section>
 
 <!-- ==================================================================
-     Our House — the founding story
+     From the Journal — the editorial teaser
+     ================================================================== -->
+{% if latest_articles %}
+<section class="journal-teaser" aria-labelledby="journal-teaser-heading">
+  <div class="container">
+
+    <header class="section-header">
+      <div class="section-heading">
+        <p class="eyebrow">From the Journal</p>
+        <h2 id="journal-teaser-heading">Notes from the keeper</h2>
+      </div>
+      <p class="section-more">
+        <a href="/journal">Read all notes →</a>
+      </p>
+    </header>
+
+    <ul class="journal-teaser-list" role="list">
+      {% for article in latest_articles %}
+      <li class="journal-teaser-item">
+        <a href="/journal/{{ article.slug }}" class="journal-teaser-link">
+
+          <div class="journal-teaser-media" aria-hidden="true">
+            <img
+              src="{{ article.hero_image }}"
+              alt=""
+              loading="lazy"
+              width="800"
+              height="600">
+          </div>
+
+          <div class="journal-teaser-body">
+            <p class="journal-teaser-eyebrow">{{ article.eyebrow }}</p>
+            <h3 class="journal-teaser-title">{{ article.title }}</h3>
+            <p class="journal-teaser-standfirst">{{ article.standfirst }}</p>
+            <p class="journal-teaser-meta">
+              {{ article.date_display }} · {{ article.reading_minutes }} min read
+            </p>
+          </div>
+
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================================================================
+     Our House
      ================================================================== -->
 <section id="house" class="about" aria-labelledby="about-heading">
   <div class="container about-inner">

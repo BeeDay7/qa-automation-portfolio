@@ -31,16 +31,13 @@
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}?v=2">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}?v=3">
 
-   <style>
+  <style>
+    /* Critical rules that must apply before the stylesheet loads. */
     [hidden] { display: none !important; }
-    #cart-drawer[aria-hidden="true"] {
-      display: none !important;
-    }
-    #cart-drawer[aria-hidden="false"] {
-      display: flex !important;
-    }
+    #cart-drawer[aria-hidden="true"] { display: none !important; }
+    #cart-drawer[aria-hidden="false"] { display: flex !important; }
     html, body { background: #fbf8f1; margin: 0; }
   </style>
 </head>
@@ -50,7 +47,7 @@
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <!-- ====================================================================
-       Announcement bar — the shopkeeper's opening sign
+       Announcement bar
        ==================================================================== -->
   <div class="announcement" role="region" aria-label="Opening hours">
     <div class="container announcement-inner">
@@ -59,12 +56,12 @@
         Open today · {{ store.opening_hours }}
       </span>
       <span class="announcement-sep" aria-hidden="true">·</span>
-      <a class="announcement-link" href="#contact">Visit the shop</a>
+      <a class="announcement-link" href="/#contact">Visit the shop</a>
     </div>
   </div>
 
   <!-- ====================================================================
-       Header — the frontispiece
+       Header — the frontispiece. The nav below appears on every page.
        ==================================================================== -->
   <header class="site-header" role="banner">
     <div class="container header-inner">
@@ -80,11 +77,21 @@
       </a>
 
       <nav class="primary-nav" aria-label="Primary">
-        <a href="/">Catalogue</a>
-        <a href="/#house">Our House</a>
-        <a href="/#contact">Contact</a>
-        <a href="/account">Account</a>
-        <a href="/docs">Registry</a>
+        <a
+          href="/"
+          data-nav="catalogue"
+          {% if request.url.path == '/' %}class="is-active" aria-current="page"{% endif %}>Catalogue</a>
+        <a
+          href="/journal"
+          data-nav="journal"
+          {% if request.url.path.startswith('/journal') %}class="is-active" aria-current="page"{% endif %}>Journal</a>
+        <a
+          href="/account"
+          data-nav="account"
+          {% if request.url.path.startswith('/account') %}class="is-active" aria-current="page"{% endif %}>Account</a>
+        <a href="/#house" data-nav="house">Our House</a>
+        <a href="/#contact" data-nav="contact">Contact</a>
+        <a href="/docs" data-nav="registry">Registry</a>
       </nav>
 
       <div class="header-actions">
@@ -121,14 +128,14 @@
   </header>
 
   <!-- ====================================================================
-       Main — every page extends this block
+       Main
        ==================================================================== -->
   <main id="main" role="main">
     {% block content %}{% endblock %}
   </main>
 
   <!-- ====================================================================
-       Footer — the back cover of the ledger
+       Footer — reachable from every page
        ==================================================================== -->
   <footer class="site-footer" id="contact" role="contentinfo">
 
@@ -165,10 +172,17 @@
       <div class="footer-col">
         <h4 class="footer-heading">Navigate</h4>
         <ul class="footer-links">
-          <li><a href="#catalogue">The collection</a></li>
-          <li><a href="#house">Our House</a></li>
-          <li><a href="/docs">Registry API</a></li>
-          <li><a href="https://github.com/BeeDay7/qa-automation-portfolio" rel="noopener">Source</a></li>
+          <li><a href="/" data-nav="catalogue">The collection</a></li>
+          <li><a href="/journal" data-nav="journal">The Journal</a></li>
+          <li><a href="/account" data-nav="account">Your account</a></li>
+          <li><a href="/#house">Our House</a></li>
+          <li><a href="/#contact">Contact</a></li>
+          <li><a href="/docs" data-nav="registry">Registry API</a></li>
+          <li>
+            <a
+              href="https://github.com/BeeDay7/qa-automation-portfolio"
+              rel="noopener">Source</a>
+          </li>
         </ul>
       </div>
 
@@ -186,7 +200,7 @@
   </footer>
 
   <!-- ====================================================================
-       Login dialog — signing the register
+       Login dialog
        ==================================================================== -->
   <dialog
     id="login-dialog"
@@ -248,7 +262,7 @@
   </dialog>
 
   <!-- ====================================================================
-       Cart drawer — the order slip
+       Cart drawer
        ==================================================================== -->
   <aside
     id="cart-drawer"
