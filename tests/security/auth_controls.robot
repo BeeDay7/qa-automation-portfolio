@@ -19,6 +19,7 @@ ${VIEWER_USER}       qa_viewer
 ${VIEWER_PASS}       ViewerOnly!234
 ${BAD_USER}          attacker
 ${BAD_PASS}          wrong-password
+${CHROME_OPTIONS}    add_argument("--headless=new");add_argument("--no-sandbox");add_argument("--disable-dev-shm-usage");add_argument("--disable-gpu");add_argument("--window-size=1920,1080")
 
 *** Test Cases ***
 SEC-001 Invalid Credentials Are Rejected In UI
@@ -72,7 +73,7 @@ SEC-005 Admin API Succeeds For Admin Session
 
 *** Keywords ***
 Open Secure Portal
-    Open Browser    ${SECURE_URL}    chrome
+    Open Browser    ${SECURE_URL}    chrome    options=${CHROME_OPTIONS}
     Maximize Browser Window
     Set Selenium Implicit Wait    5s
     Wait Until Element Is Visible    id=signin    timeout=5s

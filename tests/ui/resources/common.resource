@@ -9,6 +9,13 @@ Documentation     Shared setup, teardown, and utility keywords for every UI
 ...               Reset Storefront Session guarantees every test begins in a
 ...               known state: no cookies, no local storage, empty cart, signed
 ...               out.
+...
+...               Chrome runs headless so the suite is portable between a local
+...               desktop and a Linux CI runner. The flags below are the
+...               standard set required by GitHub Actions: --no-sandbox and
+...               --disable-dev-shm-usage prevent the chromedriver crash that
+...               occurs inside containerised runners with limited shared
+...               memory.
 Library           SeleniumLibrary
 Library           qa_portfolio.libraries.DataLoader       root=${EXECDIR}
 Library           qa_portfolio.libraries.EvidenceHelper   evidence_dir=${EXECDIR}/evidence/screenshots
@@ -18,12 +25,13 @@ ${BASE_URL}          http://127.0.0.1:8001
 ${BROWSER}           chrome
 ${IMPLICIT_WAIT}     5s
 ${PAGE_LOAD_WAIT}    10s
+${CHROME_OPTIONS}    add_argument("--headless=new");add_argument("--no-sandbox");add_argument("--disable-dev-shm-usage");add_argument("--disable-gpu");add_argument("--window-size=1920,1080")
 
 *** Keywords ***
 Open Storefront
     [Documentation]    Launch the browser and load the fixture root. Called
     ...                once per suite via Suite Setup.
-    Open Browser    ${BASE_URL}    ${BROWSER}
+    Open Browser    ${BASE_URL}    ${BROWSER}    options=${CHROME_OPTIONS}
     Maximize Browser Window
     Set Selenium Implicit Wait    ${IMPLICIT_WAIT}
     Set Selenium Timeout    ${PAGE_LOAD_WAIT}
