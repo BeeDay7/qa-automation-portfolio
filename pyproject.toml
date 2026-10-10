@@ -39,8 +39,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/beeday7/qa-automation-portfolio"
-Issues = "https://github.com/beeday7/qa-automation-portfolio/issues"
+Homepage = "https://github.com/BeeDay7/qa-automation-portfolio"
+Issues = "https://github.com/BeeDay7/qa-automation-portfolio/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
