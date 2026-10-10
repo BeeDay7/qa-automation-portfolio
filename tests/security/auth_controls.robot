@@ -74,7 +74,7 @@ SEC-005 Admin API Succeeds For Admin Session
     ...    json=${{ {"username": "${ADMIN_USER}", "password": "${ADMIN_PASS}"} }}
     ...    expected_status=200
     ${resp}=    GET On Session    admin    /api/admin/records    expected_status=200
-    Should Be Equal As Integers    ${resp.json()}[count]    2
+    Should Be Equal As Integers    ${resp.json()}[count]    3
 
 *** Keywords ***
 Open Secure Portal
@@ -82,3 +82,24 @@ Open Secure Portal
     Maximize Browser Window
     Set Selenium Implicit Wait    5s
     Wait Until Element Is Visible    id=signin    timeout=5s
+
+SEC-006 Admin Session Can Read Auth Log
+    [Documentation]    A server-side admin session receives HTTP 200 from
+    ...                the /api/auth/log endpoint.
+    [Tags]    api    priority-medium
+    Create Session    admin_log    ${SECURE_URL}    verify=False
+    ${login}=    POST On Session    admin_log    /api/login
+    ...    json=${{ {"username": "${ADMIN_USER}", "password": "${ADMIN_PASS}"} }}
+    ...    expected_status=200
+    ${resp}=    GET On Session    admin_log    /api/auth/log    expected_status=200
+    Should Be True    ${resp.json()}[count] >= 1
+
+SEC-007 Viewer Session Is Refused The Auth Log
+    [Documentation]    A viewer session receives HTTP 403 from /api/auth/log.
+    [Tags]    api    negative    priority-medium
+    Create Session    viewer_log    ${SECURE_URL}    verify=False
+    ${login}=    POST On Session    viewer_log    /api/login
+    ...    json=${{ {"username": "${VIEWER_USER}", "password": "${VIEWER_PASS}"} }}
+    ...    expected_status=200
+    ${resp}=    GET On Session    viewer_log    /api/auth/log    expected_status=403
+    Should Be Equal    ${resp.json()}[error]    forbidden

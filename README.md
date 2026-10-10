@@ -16,6 +16,7 @@ layers. Three FastAPI fixtures. Three Robot Framework suites. A single CI
 pipeline that runs everything on every push.
 
 **Author:** Abidemi Kuburat Adedeji
+**Co-founder:** Sulaiman Oluwasegun Yusuff
 **Status:** Self-directed portfolio — *not* client work, *not* a
 substitute for professional experience or formal certification.
 

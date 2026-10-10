@@ -2,40 +2,115 @@
 {% block title %}SecurePortal — Sign in{% endblock %}
 {% block page_id %}login{% endblock %}
 
-{% block content %}
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-brand">
-      <span class="logo-dot"></span>
-      <span>SecurePortal</span>
-      <span class="env-badge">FIXTURE</span>
+{% block body %}
+
+<div class="login-shell">
+
+  <aside class="login-brand-panel" aria-hidden="true">
+    <div class="brand-panel-inner">
+      <div class="brand-mark">
+        <span class="brand-dot"></span>
+        <span class="brand-name">SecurePortal</span>
+      </div>
+      <p class="brand-env">Fixture environment</p>
+
+      <div class="brand-status">
+        <span class="status-indicator status-indicator--online"></span>
+        <span class="status-label">System online</span>
+      </div>
+
+      <dl class="brand-metrics">
+        <div>
+          <dt>Version</dt>
+          <dd>1.0.0</dd>
+        </div>
+        <div>
+          <dt>Region</dt>
+          <dd>local</dd>
+        </div>
+        <div>
+          <dt>Auth mode</dt>
+          <dd>session</dd>
+        </div>
+      </dl>
+
+      <p class="brand-quote">
+        “Every authentication attempt is logged. Every session is inspected.”
+      </p>
     </div>
+  </aside>
 
-    <h1>Sign in to your workspace</h1>
-    <p class="login-sub">Server-side session. No real accounts.</p>
+  <main class="login-main">
+    <div class="login-card">
 
-    <form id="login-form" autocomplete="off">
-      <label class="field">
-        <span>Username</span>
-        <input id="username" name="username" type="text" required autofocus>
-      </label>
-      <label class="field">
-        <span>Password</span>
-        <input id="password" name="password" type="password" required>
-      </label>
+      <header class="login-header">
+        <p class="eyebrow">Restricted access</p>
+        <h1 class="login-title">Sign in</h1>
+        <p class="login-sub">
+          Provide your credentials to reach the operator console.
+        </p>
+      </header>
 
-      <button id="signin" type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <form id="login-form" class="login-form" autocomplete="off" novalidate>
 
-      <p id="result" class="result" role="status">Signed out</p>
-    </form>
+        <label class="field">
+          <span class="field-label">Username</span>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            autofocus
+            spellcheck="false"
+            autocapitalize="off">
+        </label>
 
-    <div class="hint">
-      <p><strong>Demo accounts</strong></p>
-      <ul>
-        <li><code>qa_admin</code> / <code>LocalOnly!234</code></li>
-        <li><code>qa_viewer</code> / <code>ViewerOnly!234</code></li>
-      </ul>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required>
+        </label>
+
+        <button id="signin" type="submit" class="btn btn-primary btn-block">
+          Authenticate
+        </button>
+
+        <p id="result" class="login-result" role="status" aria-live="polite">
+          Signed out
+        </p>
+
+      </form>
+
+      <div class="login-hint">
+        <p class="login-hint-title">Test credentials</p>
+        <ul class="login-hint-list">
+          <li>
+            <code>qa_admin</code>
+            <span class="hint-sep">·</span>
+            <code>LocalOnly!234</code>
+            <span class="hint-role">admin</span>
+          </li>
+          <li>
+            <code>qa_viewer</code>
+            <span class="hint-sep">·</span>
+            <code>ViewerOnly!234</code>
+            <span class="hint-role">viewer</span>
+          </li>
+          <li>
+            <code>qa_auditor</code>
+            <span class="hint-sep">·</span>
+            <code>AuditOnly!234</code>
+            <span class="hint-role">auditor</span>
+          </li>
+        </ul>
+      </div>
+
     </div>
-  </div>
+  </main>
+
 </div>
+
 {% endblock %}

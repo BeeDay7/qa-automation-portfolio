@@ -238,6 +238,56 @@
     });
   };
 
+  /* ---------- contact form ------------------------------------------- */
+
+  const initContactForm = () => {
+    const form = document.getElementById("contact-form");
+    if (!form) return;
+
+    const status = document.getElementById("contact-status");
+    const submit = document.getElementById("contact-submit");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("contact-name").value.trim();
+      const email = document.getElementById("contact-email").value.trim();
+      const subject = document.getElementById("contact-subject").value.trim();
+      const message = document.getElementById("contact-message").value.trim();
+
+      status.textContent = "";
+      status.classList.remove("is-error", "is-success");
+
+      if (!name || !email || message.length < 10) {
+        status.textContent = "Please fill in your name, email, and a message of at least ten characters.";
+        status.classList.add("is-error");
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      try {
+        const { ok, body } = await api("/api/contact", {
+          method: "POST",
+          body: JSON.stringify({ name, email, subject, message }),
+        });
+        if (ok) {
+          status.textContent = body.message || "Sent.";
+          status.classList.add("is-success");
+          form.reset();
+          const subjectField = document.getElementById("contact-subject");
+          if (subjectField) subjectField.value = "General enquiry";
+        } else {
+          status.textContent = "Something went wrong on our end. Please try again.";
+          status.classList.add("is-error");
+        }
+      } catch (_) {
+        status.textContent = "Network error. Please try again.";
+        status.classList.add("is-error");
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  };
+
   /* ---------- global event wiring ------------------------------------ */
 
   const wireEvents = () => {
@@ -284,7 +334,6 @@
       }
     });
 
-    // Add-to-basket buttons on the catalogue and related product cards
     document.addEventListener("click", async (e) => {
       const btn = e.target.closest(".add");
       if (!btn) return;
@@ -317,6 +366,7 @@
     initFilters();
     initSearch();
     initProductDetail();
+    initContactForm();
     wireEvents();
 
     if (productListEl) {

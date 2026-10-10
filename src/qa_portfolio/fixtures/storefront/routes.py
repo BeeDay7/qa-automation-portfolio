@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, EmailStr, Field
 
 from .data import (
     CATEGORIES,
@@ -28,6 +30,20 @@ CART_KEY = "cart"
 USER_KEY = "user_email"
 
 CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)
+
+# In-memory contact log. Resets on fixture restart. Used by the fixture to
+# demonstrate that form submissions actually arrive at the server. Not a
+# mail queue. Not persistent. Not exposed via any API endpoint.
+CONTACT_LOG: list[dict[str, str]] = []
+
+
+class ContactBody(BaseModel):
+    """Payload for the contact form."""
+
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    subject: str = Field(default="General enquiry", max_length=120)
+    message: str = Field(min_length=10, max_length=2000)
 
 
 def _base_context(request: Request) -> dict[str, Any]:
@@ -133,6 +149,12 @@ async def journal_article(request: Request, slug: str) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name="journal_article.html", context=ctx)
 
 
+@router.get("/contact", response_class=HTMLResponse, include_in_schema=False)
+async def contact_page(request: Request) -> HTMLResponse:
+    ctx = _base_context(request)
+    return templates.TemplateResponse(request=request, name="contact.html", context=ctx)
+
+
 # ---------- session ----------
 
 
@@ -162,6 +184,31 @@ async def login(request: Request, body: LoginRequest) -> JSONResponse:
 async def logout(request: Request) -> JSONResponse:
     request.session.clear()
     return JSONResponse({"ok": True})
+
+
+# ---------- contact ----------
+
+
+@router.post("/api/contact")
+async def submit_contact(body: ContactBody) -> JSONResponse:
+    CONTACT_LOG.append(
+        {
+            "received_at": datetime.now(UTC).isoformat(),
+            "name": body.name,
+            "email": str(body.email),
+            "subject": body.subject,
+            "message": body.message,
+        }
+    )
+    return JSONResponse(
+        {
+            "ok": True,
+            "message": (
+                "Thank you. Your note has reached the shop. "
+                "We answer every message within one working day."
+            ),
+        }
+    )
 
 
 # ---------- catalogue ----------

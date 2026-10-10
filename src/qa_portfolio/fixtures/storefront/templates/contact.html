@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Contact — {{ store.name }}{% endblock %}
+{% block description %}Write to the shop. Every message is read by hand, and answered within one working day.{% endblock %}
+{% block page_id %}contact{% endblock %}
+
+{% block content %}
+
+<section class="contact-hero" aria-labelledby="contact-heading">
+  <div class="container contact-hero-inner">
+    <p class="eyebrow">Write to us</p>
+    <h1 id="contact-heading" class="contact-title">
+      Every message is read by hand.
+    </h1>
+    <p class="contact-lede">
+      Whether you are asking about an item, chasing an order, or simply
+      curious about something, we would like to hear from you. One of us
+      reads every message that arrives. We answer within one working day.
+    </p>
+  </div>
+</section>
+
+<section class="contact-grid-section">
+  <div class="container contact-grid">
+
+    <div class="contact-form-col">
+      <form id="contact-form" class="contact-form" novalidate>
+
+        <header class="contact-form-header">
+          <p class="eyebrow">The form</p>
+          <h2 class="contact-form-title">Send a note</h2>
+        </header>
+
+        <div class="contact-field-row">
+          <label class="field contact-field">
+            <span class="field-label">Your name</span>
+            <input
+              id="contact-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              required
+              maxlength="120">
+          </label>
+
+          <label class="field contact-field">
+            <span class="field-label">Your email</span>
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              maxlength="200"
+              spellcheck="false"
+              autocapitalize="off">
+          </label>
+        </div>
+
+        <label class="field contact-field">
+          <span class="field-label">Subject</span>
+          <input
+            id="contact-subject"
+            name="subject"
+            type="text"
+            maxlength="120"
+            value="General enquiry">
+        </label>
+
+        <label class="field contact-field">
+          <span class="field-label">Your message</span>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="8"
+            required
+            minlength="10"
+            maxlength="2000"
+            placeholder="Tell us what you would like us to know."></textarea>
+          <span class="field-hint">Between 10 and 2000 characters.</span>
+        </label>
+
+        <div class="contact-actions">
+          <button
+            id="contact-submit"
+            type="submit"
+            class="btn btn-primary btn-lg">
+            Send to the shop
+          </button>
+          <p class="contact-actions-note">
+            We reply within one working day.
+          </p>
+        </div>
+
+        <p
+          id="contact-status"
+          class="contact-status"
+          role="status"
+          aria-live="polite"></p>
+
+      </form>
+    </div>
+
+    <aside class="contact-info-col">
+
+      <article class="contact-card">
+        <header class="contact-card-header">
+          <p class="eyebrow">The shop</p>
+          <h3 class="contact-card-title">Where we are</h3>
+        </header>
+        <address class="contact-address">
+          <p>{{ store.address }}</p>
+          <p>{{ store.region }}</p>
+          <p>Nigeria</p>
+        </address>
+        <p class="contact-note">
+          Walk-ins are welcome. No appointment is needed.
+        </p>
+      </article>
+
+      <article class="contact-card">
+        <header class="contact-card-header">
+          <p class="eyebrow">Write direct</p>
+          <h3 class="contact-card-title">Or reach us another way</h3>
+        </header>
+        <dl class="contact-direct">
+          <div class="contact-direct-row">
+            <dt>Email</dt>
+            <dd>
+              <a href="mailto:{{ store.email }}">{{ store.email }}</a>
+            </dd>
+          </div>
+          <div class="contact-direct-row">
+            <dt>Phone</dt>
+            <dd>
+              <a href="tel:{{ store.phone | replace(' ', '') }}">{{ store.phone }}</a>
+            </dd>
+          </div>
+          <div class="contact-direct-row">
+            <dt>Hours</dt>
+            <dd>{{ store.opening_hours }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="contact-card contact-card--quiet">
+        <header class="contact-card-header">
+          <p class="eyebrow">On reply time</p>
+          <h3 class="contact-card-title">A promise about pace</h3>
+        </header>
+        <p class="contact-quiet-body">
+          We answer every message within one working day. If it takes
+          longer, something has gone wrong on our end — please write
+          again. Nothing is more useful to us than a customer who
+          follows up.
+        </p>
+      </article>
+
+    </aside>
+
+  </div>
+</section>
+
+{% endblock %}

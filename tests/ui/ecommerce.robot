@@ -18,6 +18,7 @@ Resource          resources/pages/products_page.resource
 Resource          resources/pages/cart_page.resource
 Resource          resources/pages/account_page.resource
 Resource          resources/pages/journal_page.resource
+Resource          resources/pages/contact_page.resource
 Suite Setup       Open Storefront
 Suite Teardown    Close Storefront
 Test Setup        Reset Storefront Session
@@ -223,3 +224,35 @@ DM-020 Footer Links Reach All Primary Pages
     Click Safely    css=.footer-links a[data-nav='journal']
     Wait Until Location Contains    /journal    timeout=5s
     Wait Until Element Is Visible    id=journal-heading    timeout=5s
+
+DM-021 Contact Page Renders Form And Information
+    [Documentation]    The contact page shows the form, the address, and the
+    ...                opening hours.
+    [Tags]    smoke    functional    priority-high    contact
+    Go To Contact Page
+    Contact Page Should Show Form
+    Contact Page Should Show Opening Hours
+
+DM-022 Contact Form Submits Successfully
+    [Documentation]    Filling the form and submitting it shows the success
+    ...                status message from the server.
+    [Tags]    smoke    functional    priority-high    contact
+    Go To Contact Page
+    Fill Contact Form
+    ...    Test Visitor
+    ...    visitor@example.com
+    ...    A question about the house
+    ...    I would like to know how the store began, and where the name Azam comes from.
+    Submit Contact Form
+    Contact Status Should Contain    Your note has reached the shop
+
+DM-023 Contact Form Rejects Empty Name
+    [Documentation]    Submitting the form with an empty name does not reach
+    ...                the server. The browser's own validation prevents it.
+    [Tags]    negative    priority-medium    contact
+    Go To Contact Page
+    Input Text        ${CONTACT_EMAIL}     visitor@example.com
+    Input Text        ${CONTACT_MESSAGE}   A message long enough to satisfy the minimum.
+    Submit Contact Form
+    Sleep    0.5s
+    Contact Status Should Not Contain Success

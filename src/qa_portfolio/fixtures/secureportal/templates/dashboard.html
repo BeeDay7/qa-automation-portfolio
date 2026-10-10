@@ -1,21 +1,163 @@
 {% extends "base.html" %}
-{% block title %}SecurePortal — Dashboard{% endblock %}
+{% block title %}SecurePortal — Operator Console{% endblock %}
 {% block page_id %}dashboard{% endblock %}
 
-{% block content %}
-<header class="app-header">
-  <span class="logo-dot"></span>
-  <h1>SecurePortal</h1>
-  <span id="session-badge" class="role-badge">checking…</span>
-  <button id="logout" class="btn btn-ghost">Sign out</button>
+{% block body %}
+
+<header class="console-header">
+  <div class="console-header-inner">
+
+    <div class="console-brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">SecurePortal</span>
+      <span class="console-env">fixture</span>
+    </div>
+
+    <nav class="console-nav" aria-label="Sections">
+      <a href="#session" class="console-nav-link is-active">Session</a>
+      <a href="#records" class="console-nav-link">Records</a>
+      <a href="#log" class="console-nav-link">Auth Log</a>
+    </nav>
+
+    <div class="console-session">
+      <span class="status-indicator status-indicator--online" aria-hidden="true"></span>
+      <span
+        id="session-badge"
+        class="session-badge"
+        aria-live="polite">checking…</span>
+      <button
+        id="logout"
+        class="btn btn-ghost btn-sm"
+        type="button">Sign out</button>
+    </div>
+
+  </div>
 </header>
 
-<main class="app-main">
-  <section class="panel">
-    <h2>Admin records</h2>
-    <p class="muted">Only visible to sessions with <code>role=admin</code>. Non-admin sessions receive HTTP 403.</p>
-    <button id="load-records" class="btn btn-primary">Load records</button>
-    <ul id="records" class="record-list"></ul>
+<main class="console-main">
+
+  <section id="session" class="console-section" aria-labelledby="session-heading">
+    <header class="section-heading">
+      <p class="eyebrow">Session</p>
+      <h2 id="session-heading" class="section-title">Current operator</h2>
+    </header>
+
+    <div class="section-body">
+      <dl class="session-inspector">
+        <div class="inspector-row">
+          <dt>Username</dt>
+          <dd id="inspect-username" class="inspector-value inspector-value--mono">—</dd>
+        </div>
+        <div class="inspector-row">
+          <dt>Display name</dt>
+          <dd id="inspect-name" class="inspector-value">—</dd>
+        </div>
+        <div class="inspector-row">
+          <dt>Role</dt>
+          <dd id="inspect-role" class="inspector-value">
+            <span class="role-badge" id="role-badge">—</span>
+          </dd>
+        </div>
+        <div class="inspector-row">
+          <dt>Session type</dt>
+          <dd class="inspector-value inspector-value--mono">signed_cookie</dd>
+        </div>
+        <div class="inspector-row">
+          <dt>Transport</dt>
+          <dd class="inspector-value inspector-value--mono">http / localhost</dd>
+        </div>
+      </dl>
+
+      <aside class="session-permissions">
+        <p class="eyebrow">Permissions</p>
+        <ul id="permission-list" class="permission-list">
+          <li class="permission-item" data-perm="session">
+            <span class="perm-mark">◦</span>
+            <span>Read own session</span>
+          </li>
+          <li class="permission-item" data-perm="admin">
+            <span class="perm-mark">◦</span>
+            <span>Read admin records</span>
+          </li>
+          <li class="permission-item" data-perm="log">
+            <span class="perm-mark">◦</span>
+            <span>Read auth log</span>
+          </li>
+        </ul>
+      </aside>
+    </div>
   </section>
+
+  <section id="records" class="console-section" aria-labelledby="records-heading">
+    <header class="section-heading">
+      <p class="eyebrow">Registry</p>
+      <h2 id="records-heading" class="section-title">Admin records</h2>
+    </header>
+
+    <div class="section-body">
+      <div class="records-toolbar">
+        <p class="records-note">
+          Only sessions with <code>role=admin</code> may read these records.
+          Non-admin sessions receive <code>HTTP 403</code>.
+        </p>
+        <button
+          id="load-records"
+          class="btn btn-primary btn-sm"
+          type="button">Load records</button>
+      </div>
+
+      <table class="records-table" aria-label="Admin records">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Classification</th>
+            <th scope="col">Last updated</th>
+          </tr>
+        </thead>
+        <tbody id="records-body">
+          <tr class="records-empty">
+            <td colspan="4">
+              Press <strong>Load records</strong> to fetch the registry.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="log" class="console-section" aria-labelledby="log-heading">
+    <header class="section-heading">
+      <p class="eyebrow">Telemetry</p>
+      <h2 id="log-heading" class="section-title">Authentication log</h2>
+    </header>
+
+    <div class="section-body">
+      <div class="log-toolbar">
+        <p class="log-note">
+          Every attempt is recorded. Available to <code>admin</code> and
+          <code>auditor</code> roles.
+        </p>
+        <button
+          id="refresh-log"
+          class="btn btn-ghost btn-sm"
+          type="button">Refresh</button>
+      </div>
+
+      <div class="log-panel" role="log" aria-live="polite">
+        <div class="log-header">
+          <span>Time</span>
+          <span>Username</span>
+          <span>Outcome</span>
+          <span>Role / reason</span>
+        </div>
+        <div id="log-body" class="log-body">
+          <p class="log-empty">No events yet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
+
 {% endblock %}
