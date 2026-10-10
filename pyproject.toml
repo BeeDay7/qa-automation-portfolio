@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qa-portfolio"
+version = "1.0.0"
+description = "Self-directed QA automation portfolio: UI, security controls, and API test suites."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Abidemi Kuburat Adedeji" }]
+keywords = ["qa", "test-automation", "robot-framework", "selenium", "fastapi"]
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic[email]>=2.8",
+    "itsdangerous>=2.2",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "robotframework>=7.0",
+    "robotframework-seleniumlibrary>=6.6",
+    "robotframework-requests>=0.9.7",
+    "selenium>=4.24",
+    "requests>=2.32",
+    "pabot>=2.18",
+]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pre-commit>=3.8",
+    "types-requests",
+    "types-PyYAML",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-handle/qa-automation-portfolio"
+Issues = "https://github.com/your-handle/qa-automation-portfolio/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "C4", "SIM", "N", "RUF"]
+ignore = ["S101"]  # asserts are acceptable in test code
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["qa_portfolio"]
+warn_unused_ignores = true
+show_error_codes = true

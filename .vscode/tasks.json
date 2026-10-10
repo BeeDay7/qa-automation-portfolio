@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install (dev)",
+      "type": "shell",
+      "command": "python -m venv .venv; .venv\\Scripts\\python -m pip install --upgrade pip; .venv\\Scripts\\pip install -r requirements-dev.txt -e \".[dev]\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Fixtures: start (bg)",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe scripts/serve_fixtures.py --background",
+      "problemMatcher": []
+    },
+    {
+      "label": "Fixtures: stop",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe scripts/serve_fixtures.py --stop",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: UI",
+      "type": "shell",
+      "command": "robot --outputdir evidence/ui tests/ui",
+      "dependsOn": [
+        "Fixtures: start (bg)"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Security",
+      "type": "shell",
+      "command": "robot --outputdir evidence/security tests/security",
+      "dependsOn": [
+        "Fixtures: start (bg)"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: API",
+      "type": "shell",
+      "command": "robot --outputdir evidence/api tests/api",
+      "dependsOn": [
+        "Fixtures: start (bg)"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": ".venv\\Scripts\\ruff check src tests scripts",
+      "problemMatcher": []
+    },
+    {
+      "label": "Type-check",
+      "type": "shell",
+      "command": ".venv\\Scripts\\mypy src",
+      "problemMatcher": []
+    }
+  ]
+}

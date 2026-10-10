@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}SecurePortal — Sign in{% endblock %}
+{% block page_id %}login{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="logo-dot"></span>
+      <span>SecurePortal</span>
+      <span class="env-badge">FIXTURE</span>
+    </div>
+
+    <h1>Sign in to your workspace</h1>
+    <p class="login-sub">Server-side session. No real accounts.</p>
+
+    <form id="login-form" autocomplete="off">
+      <label class="field">
+        <span>Username</span>
+        <input id="username" name="username" type="text" required autofocus>
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input id="password" name="password" type="password" required>
+      </label>
+
+      <button id="signin" type="submit" class="btn btn-primary btn-block">Sign in</button>
+
+      <p id="result" class="result" role="status">Signed out</p>
+    </form>
+
+    <div class="hint">
+      <p><strong>Demo accounts</strong></p>
+      <ul>
+        <li><code>qa_admin</code> / <code>LocalOnly!234</code></li>
+        <li><code>qa_viewer</code> / <code>ViewerOnly!234</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

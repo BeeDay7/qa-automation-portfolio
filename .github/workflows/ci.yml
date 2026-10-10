@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests scripts
+      - run: mypy src
+
+  robot:
+    name: Robot suites (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    needs: quality
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [ui, security, api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -e .
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+      - name: Start fixtures
+        run: |
+          python scripts/serve_fixtures.py --background
+          sleep 4
+      - name: Run Robot suite
+        run: robot --outputdir evidence/${{ matrix.suite }} tests/${{ matrix.suite }}
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-evidence-${{ matrix.suite }}
+          path: evidence/${{ matrix.suite }}
+          retention-days: 30
+      - name: Stop fixtures
+        if: always()
+        run: python scripts/serve_fixtures.py --stop

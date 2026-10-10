@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "robocorp.robotframework-lsp",
+    "redhat.vscode-yaml",
+    "eamodio.gitlens",
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+    "tamasfe.even-better-toml",
+    "editorconfig.editorconfig",
+    "davidanson.vscode-markdownlint"
+  ]
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DemoMart{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body data-page="{% block page_id %}storefront{% endblock %}">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark">DM</span>
+        <span class="brand-name">DemoMart</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="/" class="is-active">Shop</a>
+        <a href="#" class="is-muted">Deals</a>
+        <a href="#" class="is-muted">Support</a>
+      </nav>
+      <div class="header-actions">
+        <span id="login-state" data-auth="false" class="auth-badge">Signed out</span>
+        <button id="open-login" class="btn btn-ghost" type="button">Sign in</button>
+        <button id="logout" class="btn btn-ghost" type="button" hidden>Sign out</button>
+        <button id="open-cart" class="btn btn-primary" type="button">
+          Cart <span id="cart-count" class="pill">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>DemoMart is a local test fixture. No real transactions are possible.</p>
+    </div>
+  </footer>
+
+  <!-- Login dialog -->
+  <dialog id="login-dialog" class="dialog">
+    <form id="login-form" method="dialog" class="dialog-form">
+      <header class="dialog-header">
+        <h2>Sign in</h2>
+        <button type="button" class="dialog-close" data-close>×</button>
+      </header>
+      <label class="field">
+        <span>Email</span>
+        <input id="email" name="email" type="email" autocomplete="username" required>
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <p id="login-error" class="error" role="alert" hidden></p>
+      <button id="login-submit" type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+  </dialog>
+
+  <!-- Cart drawer -->
+  <aside id="cart-drawer" class="drawer" aria-hidden="true">
+    <header class="drawer-header">
+      <h2>Your cart</h2>
+      <button id="close-cart" class="dialog-close" type="button" aria-label="Close cart">×</button>
+    </header>
+    <div class="drawer-body">
+      <ul id="cart-items" class="cart-list"></ul>
+      <p id="cart-empty" class="muted">Your cart is empty.</p>
+    </div>
+    <footer class="drawer-footer">
+      <div class="cart-summary">
+        <span>Total</span>
+        <strong>$<span id="cart-total">0.00</span></strong>
+      </div>
+      <button id="checkout" class="btn btn-primary btn-block" type="button">Checkout</button>
+      <p id="message" class="status" role="status"></p>
+    </footer>
+  </aside>
+
+  <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+</body>
+</html>

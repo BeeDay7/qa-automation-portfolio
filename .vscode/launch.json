@@ -1,0 +1,74 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Fixture: Storefront",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "qa_portfolio.fixtures.storefront.app:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8001",
+        "--reload"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Fixture: SecurePortal",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "qa_portfolio.fixtures.secureportal.app:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8002",
+        "--reload"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Fixture: API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "qa_portfolio.fixtures.api.app:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8003",
+        "--reload"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Robot: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "robot",
+      "args": [
+        "--outputdir",
+        "evidence/debug",
+        "${file}"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}

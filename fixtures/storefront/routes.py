@@ -1,0 +1,141 @@
+"""HTTP routes for the DemoMart storefront fixture."""
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+
+from .data import PRODUCTS, USERS
+from .models import AddItemRequest, CartItem, CartView, LoginRequest, Product
+
+BASE_DIR = Path(__file__).parent
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
+
+router = APIRouter()
+CART_KEY = "cart"
+USER_KEY = "user_email"
+
+
+# ---------- pages ----------
+
+
+@router.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def index(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"products": PRODUCTS},
+    )
+
+
+# ---------- session ----------
+
+
+@router.get("/api/session")
+async def read_session(request: Request) -> JSONResponse:
+    email = request.session.get(USER_KEY)
+    user = USERS.get(email) if email else None
+    return JSONResponse(
+        {
+            "authenticated": bool(user),
+            "email": email,
+            "name": user["name"] if user else None,
+            "role": user["role"] if user else None,
+        }
+    )
+
+
+@router.post("/api/login")
+async def login(request: Request, body: LoginRequest) -> JSONResponse:
+    record = USERS.get(str(body.email))
+    if record is None or record["password"] != body.password:
+        return JSONResponse({"error": "invalid_credentials"}, status_code=401)
+    request.session[USER_KEY] = str(body.email)
+    return JSONResponse({"ok": True, "name": record["name"], "role": record["role"]})
+
+
+@router.post("/api/logout")
+async def logout(request: Request) -> JSONResponse:
+    request.session.clear()
+    return JSONResponse({"ok": True})
+
+
+# ---------- catalogue ----------
+
+
+@router.get("/api/products")
+async def list_products(q: str = "") -> JSONResponse:
+    needle = q.strip().lower()
+    items = (
+        [p for p in PRODUCTS if needle in str(p["name"]).lower()]
+        if needle
+        else list(PRODUCTS)
+    )
+    return JSONResponse({"items": items, "count": len(items)})
+
+
+@router.get("/api/products/{product_id}")
+async def get_product(product_id: int) -> JSONResponse:
+    item = next((p for p in PRODUCTS if p["id"] == product_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail="product_not_found")
+    return JSONResponse(Product(**item).model_dump())
+
+
+# ---------- cart ----------
+
+
+def _cart_view(items: list[dict[str, object]]) -> CartView:
+    view_items = [CartItem(**item) for item in items]
+    total = round(sum(i.price * i.quantity for i in view_items), 2)
+    return CartView(items=view_items, count=sum(i.quantity for i in view_items), total=total)
+
+
+@router.get("/api/cart")
+async def read_cart(request: Request) -> JSONResponse:
+    items = list(request.session.get(CART_KEY, []))
+    return JSONResponse(_cart_view(items).model_dump())
+
+
+@router.post("/api/cart/items")
+async def add_item(request: Request, body: AddItemRequest) -> JSONResponse:
+    product = next((p for p in PRODUCTS if p["id"] == body.product_id), None)
+    if product is None:
+        raise HTTPException(status_code=404, detail="product_not_found")
+    items = list(request.session.get(CART_KEY, []))
+    existing = next((i for i in items if i["id"] == product["id"]), None)
+    if existing:
+        existing["quantity"] += 1
+    else:
+        items.append(
+            {
+                "id": product["id"],
+                "name": product["name"],
+                "price": product["price"],
+                "quantity": 1,
+            }
+        )
+    request.session[CART_KEY] = items
+    return JSONResponse(_cart_view(items).model_dump())
+
+
+@router.post("/api/cart/clear")
+async def clear_cart(request: Request) -> JSONResponse:
+    request.session[CART_KEY] = []
+    return JSONResponse({"ok": True})
+
+
+# ---------- checkout ----------
+
+
+@router.post("/api/checkout")
+async def checkout(request: Request) -> JSONResponse:
+    if not request.session.get(USER_KEY):
+        return JSONResponse({"message": "Please sign in before checkout."}, status_code=401)
+    items = request.session.get(CART_KEY, [])
+    if not items:
+        return JSONResponse({"message": "Your cart is empty."})
+    request.session[CART_KEY] = []
+    return JSONResponse({"message": "Order submitted successfully (demo)."})

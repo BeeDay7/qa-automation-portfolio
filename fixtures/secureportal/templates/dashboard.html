@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}SecurePortal — Dashboard{% endblock %}
+{% block page_id %}dashboard{% endblock %}
+
+{% block content %}
+<header class="app-header">
+  <span class="logo-dot"></span>
+  <h1>SecurePortal</h1>
+  <span id="session-badge" class="role-badge">checking…</span>
+  <button id="logout" class="btn btn-ghost">Sign out</button>
+</header>
+
+<main class="app-main">
+  <section class="panel">
+    <h2>Admin records</h2>
+    <p class="muted">Only visible to sessions with <code>role=admin</code>. Non-admin sessions receive HTTP 403.</p>
+    <button id="load-records" class="btn btn-primary">Load records</button>
+    <ul id="records" class="record-list"></ul>
+  </section>
+</main>
+{% endblock %}
