@@ -521,6 +521,7 @@ input:focus-visible {
 
 .primary-nav {
   display: flex;
+  align-items: center;
   gap: var(--s-6);
   margin-left: var(--s-6);
 }
@@ -534,6 +535,7 @@ input:focus-visible {
   padding: 6px 0;
   border-bottom: 1px solid transparent;
   transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  white-space: nowrap;
 }
 
 .primary-nav a:hover {
