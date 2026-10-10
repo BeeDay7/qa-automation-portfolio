@@ -2,117 +2,302 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ store.name }}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  {% set page_title %}{% block title %}{{ store.name }}{% endblock %}{% endset %}
+  {% set page_description %}{% block description %}{{ store.subhead }}{% endblock %}{% endset %}
+
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_description }}">
+  <meta name="author" content="{{ store.name }}">
+  <meta name="theme-color" content="#0d3b2e">
+  <meta name="color-scheme" content="light">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ store.name }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_description }}">
+  <meta property="og:url" content="https://{{ store.domain }}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_description }}">
+
+  <link rel="canonical" href="https://{{ store.domain }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
-  <style>
-    /* Force the hidden attribute to actually hide. Without this, `.btn
-       { display: inline-flex }` overrides the UA default `[hidden] { display:
-       none }`, and hidden buttons remain visible to Selenium. */
-    [hidden] { display: none !important; }
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
-    /* Cart drawer state — overrides the base translateX rule so the drawer
-       opens on aria-hidden="false" and stops intercepting clicks when closed. */
-    #cart-drawer[aria-hidden="true"]  { transform: translateX(100%); pointer-events: none; }
-    #cart-drawer[aria-hidden="false"] { transform: translateX(0);    pointer-events: auto; }
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}?v=2">
+
+   <style>
+    [hidden] { display: none !important; }
+    #cart-drawer[aria-hidden="true"] {
+      display: none !important;
+    }
+    #cart-drawer[aria-hidden="false"] {
+      display: flex !important;
+    }
+    html, body { background: #fbf8f1; margin: 0; }
   </style>
 </head>
+
 <body data-page="{% block page_id %}storefront{% endblock %}">
-  <header class="site-header">
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ====================================================================
+       Announcement bar — the shopkeeper's opening sign
+       ==================================================================== -->
+  <div class="announcement" role="region" aria-label="Opening hours">
+    <div class="container announcement-inner">
+      <span class="announcement-dot" aria-hidden="true"></span>
+      <span class="announcement-text">
+        Open today · {{ store.opening_hours }}
+      </span>
+      <span class="announcement-sep" aria-hidden="true">·</span>
+      <a class="announcement-link" href="#contact">Visit the shop</a>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       Header — the frontispiece
+       ==================================================================== -->
+  <header class="site-header" role="banner">
     <div class="container header-inner">
-      <a class="brand" href="/">
-        <span class="brand-mark">{{ store.brand_mark }}</span>
-        <span class="brand-name">{{ store.name }}</span>
+
+      <a class="brand" href="/" aria-label="{{ store.name }} — home">
+        <span class="brand-mark" aria-hidden="true">{{ store.brand_mark }}</span>
+        <span class="brand-text">
+          <span class="brand-name">{{ store.name }}</span>
+          <span class="brand-est">
+            Est. {{ store.established }} · {{ store.address }}
+          </span>
+        </span>
       </a>
+
       <nav class="primary-nav" aria-label="Primary">
-        <a href="/" class="is-active">Shop</a>
         <a href="#catalogue">Catalogue</a>
-        <a href="#about">About</a>
+        <a href="#house">Our House</a>
         <a href="#contact">Contact</a>
+        <a href="/docs">Registry</a>
       </nav>
+
       <div class="header-actions">
-        <span id="login-state" data-auth="false" class="auth-badge">Signed out</span>
-        <button id="open-login" class="btn btn-ghost" type="button">Sign in</button>
-        <button id="logout" class="btn btn-ghost" type="button" hidden>Sign out</button>
-        <button id="open-cart" class="btn btn-primary" type="button">
-          Cart <span id="cart-count" class="pill">0</span>
+        <span
+          id="login-state"
+          class="auth-badge"
+          data-auth="false"
+          aria-live="polite">Guest</span>
+
+        <button
+          id="open-login"
+          class="btn btn-ghost btn-sm"
+          type="button"
+          aria-haspopup="dialog">Sign in</button>
+
+        <button
+          id="logout"
+          class="btn btn-ghost btn-sm"
+          type="button"
+          hidden>Sign out</button>
+
+        <button
+          id="open-cart"
+          class="btn btn-primary btn-sm cart-trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="cart-drawer">
+          <span>Basket</span>
+          <span id="cart-count" class="pill" aria-live="polite">0</span>
         </button>
       </div>
+
     </div>
   </header>
 
-  <main>
+  <!-- ====================================================================
+       Main — every page extends this block
+       ==================================================================== -->
+  <main id="main" role="main">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer" id="contact">
+  <!-- ====================================================================
+       Footer — the back cover of the ledger
+       ==================================================================== -->
+  <footer class="site-footer" id="contact" role="contentinfo">
+
+    <div class="container footer-lead">
+      <p class="footer-eyebrow">{{ FOUNDING.eyebrow if FOUNDING is defined else "Our House" }}</p>
+      <p class="footer-lead-text">{{ store.closing_line }}</p>
+    </div>
+
     <div class="container footer-grid">
-      <div class="footer-col">
+
+      <div class="footer-col footer-brand-col">
+        <span class="brand-mark brand-mark--lg" aria-hidden="true">{{ store.brand_mark }}</span>
         <h3 class="footer-brand">{{ store.name }}</h3>
         <p class="footer-tagline">{{ store.tagline }}</p>
         <p class="footer-note">{{ store.footer_note }}</p>
       </div>
+
       <div class="footer-col">
-        <h4>Contact</h4>
-        <p><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>
-        <p>{{ store.phone }}</p>
-        <p>{{ store.address }}</p>
+        <h4 class="footer-heading">Contact</h4>
+        <address class="footer-address">
+          <p><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>
+          <p><a href="tel:{{ store.phone | replace(' ', '') }}">{{ store.phone }}</a></p>
+          <p>{{ store.address }}</p>
+          <p>{{ store.region }}</p>
+        </address>
       </div>
+
       <div class="footer-col">
-        <h4>Catalogue</h4>
-        <p><a href="#catalogue">All products</a></p>
-        <p><a href="#catalogue">Accessories</a></p>
-        <p><a href="#catalogue">Peripherals</a></p>
+        <h4 class="footer-heading">Visit</h4>
+        <p class="footer-hours">{{ store.opening_hours }}</p>
+        <p class="footer-note-inline">Walk-ins welcome. No appointment needed.</p>
       </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Navigate</h4>
+        <ul class="footer-links">
+          <li><a href="#catalogue">The collection</a></li>
+          <li><a href="#house">Our House</a></li>
+          <li><a href="/docs">Registry API</a></li>
+          <li><a href="https://github.com/BeeDay7/qa-automation-portfolio" rel="noopener">Source</a></li>
+        </ul>
+      </div>
+
     </div>
+
     <div class="container footer-bottom">
-      <p>© 2026 {{ store.name }} · {{ store.domain }}</p>
+      <p class="footer-copyright">
+        © 2026 {{ store.name }} · {{ store.domain }} · All rights reserved.
+      </p>
+      <p class="footer-disclosure">
+        A QA portfolio fixture. Not a live merchant.
+      </p>
     </div>
+
   </footer>
 
-  <!-- Login dialog -->
-  <dialog id="login-dialog" class="dialog">
-    <form id="login-form" method="dialog" class="dialog-form">
+  <!-- ====================================================================
+       Login dialog — signing the register
+       ==================================================================== -->
+  <dialog
+    id="login-dialog"
+    class="dialog"
+    aria-labelledby="login-title"
+    aria-describedby="login-subtitle">
+
+    <form id="login-form" class="dialog-form" method="dialog" novalidate>
+
       <header class="dialog-header">
-        <h2>Sign in to {{ store.name }}</h2>
-        <button type="button" class="dialog-close" data-close>×</button>
+        <div class="dialog-heading">
+          <p class="eyebrow">Account</p>
+          <h2 id="login-title" class="dialog-title">Sign the register</h2>
+          <p id="login-subtitle" class="dialog-sub">
+            Your basket, and your place in the ledger, will be waiting.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="dialog-close"
+          data-close
+          aria-label="Close">×</button>
       </header>
+
       <label class="field">
-        <span>Email</span>
-        <input id="email" name="email" type="email" autocomplete="username" required>
+        <span class="field-label">Email</span>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="username"
+          required
+          spellcheck="false"
+          autocapitalize="off">
       </label>
+
       <label class="field">
-        <span>Password</span>
-        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <span class="field-label">Password</span>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required>
       </label>
-      <p id="login-error" class="error" role="alert" hidden></p>
-      <button id="login-submit" type="submit" class="btn btn-primary btn-block">Sign in</button>
+
+      <p id="login-error" class="error" role="alert" aria-live="assertive" hidden></p>
+
+      <button
+        id="login-submit"
+        type="submit"
+        class="btn btn-primary btn-block">Sign in</button>
+
+      <p class="dialog-footnote">
+        Demo credentials are documented in the repository README.
+      </p>
+
     </form>
   </dialog>
 
-  <!-- Cart drawer -->
-  <aside id="cart-drawer" class="drawer" aria-hidden="true">
+  <!-- ====================================================================
+       Cart drawer — the order slip
+       ==================================================================== -->
+  <aside
+    id="cart-drawer"
+    class="drawer"
+    role="dialog"
+    aria-modal="false"
+    aria-hidden="true"
+    aria-labelledby="cart-title">
+
     <header class="drawer-header">
-      <h2>Your cart</h2>
-      <button id="close-cart" class="dialog-close" type="button" aria-label="Close cart">×</button>
+      <div class="drawer-heading">
+        <p class="eyebrow">Basket</p>
+        <h2 id="cart-title" class="drawer-title">Your selection</h2>
+      </div>
+      <button
+        id="close-cart"
+        class="dialog-close"
+        type="button"
+        aria-label="Close basket">×</button>
     </header>
+
     <div class="drawer-body">
-      <ul id="cart-items" class="cart-list"></ul>
-      <p id="cart-empty" class="muted">Your cart is empty.</p>
+      <ul id="cart-items" class="cart-list" aria-live="polite"></ul>
+      <div id="cart-empty" class="cart-empty">
+        <p class="cart-empty-title">Nothing selected yet.</p>
+        <p class="cart-empty-body">
+          Browse the catalogue and add anything that catches your eye.
+        </p>
+      </div>
     </div>
+
     <footer class="drawer-footer">
       <div class="cart-summary">
-        <span>Total</span>
-        <strong>$<span id="cart-total">0.00</span></strong>
+        <span class="cart-summary-label">Subtotal</span>
+        <strong class="cart-summary-value">$<span id="cart-total">0.00</span></strong>
       </div>
-      <button id="checkout" class="btn btn-primary btn-block" type="button">Checkout</button>
-      <p id="message" class="status" role="status"></p>
+      <button
+        id="checkout"
+        class="btn btn-primary btn-block"
+        type="button">Proceed to checkout</button>
+      <p
+        id="message"
+        class="status"
+        role="status"
+        aria-live="polite"></p>
     </footer>
+
   </aside>
 
   <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+
 </body>
 </html>

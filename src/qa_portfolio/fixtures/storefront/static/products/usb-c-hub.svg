@@ -1,12 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#c7d2fe"/>
-  </linearGradient></defs>
-  <rect width="400" height="300" fill="url(#g)"/>
-  <rect x="80" y="120" width="240" height="60" rx="12" fill="#1e293b"/>
-  <rect x="100" y="140" width="30" height="20" rx="3" fill="#64748b"/>
-  <rect x="145" y="140" width="30" height="20" rx="3" fill="#64748b"/>
-  <rect x="190" y="140" width="30" height="20" rx="3" fill="#64748b"/>
-  <rect x="235" y="140" width="30" height="20" rx="3" fill="#64748b"/>
-  <rect x="280" y="140" width="20" height="20" rx="3" fill="#64748b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="USB-C hub">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf8f1"/><stop offset="1" stop-color="#f4ecdb"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d3634"/><stop offset="1" stop-color="#1a1614"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <ellipse cx="200" cy="222" rx="140" ry="12" fill="#1a1614" opacity="0.13"/>
+  <rect x="60" y="120" width="280" height="70" rx="10" fill="url(#body)"/>
+  <rect x="60" y="120" width="280" height="12" rx="6" fill="#4a4240" opacity="0.4"/>
+  <g fill="#0d3b2e">
+    <rect x="80" y="145" width="28" height="20" rx="3"/>
+    <rect x="120" y="145" width="28" height="20" rx="3"/>
+    <rect x="160" y="145" width="28" height="20" rx="3"/>
+    <rect x="200" y="145" width="28" height="20" rx="3"/>
+  </g>
+  <g fill="#b8860b">
+    <rect x="240" y="145" width="34" height="20" rx="3"/>
+    <rect x="286" y="145" width="34" height="20" rx="3"/>
+  </g>
+  <circle cx="315" cy="185" r="4" fill="#0d3b2e"/>
 </svg>

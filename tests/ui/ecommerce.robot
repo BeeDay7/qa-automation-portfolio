@@ -3,16 +3,13 @@ Documentation     Functional UI test suite for the Azam Trading Store
 ...               storefront.
 ...
 ...               Scope: browser-driven functional tests against a locally
-...               hosted FastAPI fixture. Every interaction is initiated by
-...               Selenium against http://127.0.0.1:8001.
+...               hosted FastAPI fixture.
 ...
 ...               Test isolation: Reset Storefront Session runs before every
-...               test, clearing all cookies and storage so that no test
-...               depends on or contaminates another.
+...               test, clearing all cookies and storage.
 ...
 ...               Evidence: failures trigger an automatic screenshot into
-...               evidence/screenshots/. Robot-native report.html, log.html,
-...               and output.xml are written to evidence/ui/.
+...               evidence/screenshots/.
 ...
 ...               Status: self-directed portfolio work.
 Resource          resources/common.resource
@@ -36,13 +33,12 @@ DM-001 Valid Login Shows Signed In State
     ${users}=    Load Yaml File    ${USERS_FILE}
     ${u}=        Set Variable    ${users}[valid_user]
     Sign In With Credentials    ${u}[email]    ${u}[password]
-    Login State Should Contain    Signed in
+    Login State Should Contain    STORE ADMIN
     Logout Should Be Visible
 
 DM-002 Invalid Login Is Rejected
     [Documentation]    Wrong credentials display a visible error and do not
-    ...                grant a session. The dialog remains open by design so
-    ...                the user can retry.
+    ...                grant a session.
     [Tags]    smoke    negative    priority-high    auth
     ${users}=    Load Yaml File    ${USERS_FILE}
     ${u}=        Set Variable    ${users}[invalid_user]
@@ -54,11 +50,11 @@ DM-002 Invalid Login Is Rejected
 
 DM-003 Login Dialog Can Be Dismissed
     [Documentation]    The user can open the login modal and close it without
-    ...                submitting anything. No session should be established.
+    ...                submitting anything.
     [Tags]    functional    priority-medium    auth
     Open Login Dialog
     Close Login Dialog
-    Login State Should Contain    Signed out
+    Login State Should Contain    GUEST
     Logout Should Not Be Visible
 
 DM-004 Checkout Requires Authentication
@@ -122,7 +118,7 @@ DM-010 Logout Clears Session And Cart
     Cart Count Should Be    1
     Logout
     Logout Should Not Be Visible
-    Login State Should Contain    Signed out
+    Login State Should Contain    GUEST
 
 DM-011 Cart Persists Across Page Reload
     [Documentation]    Cart state is stored server-side in a signed session

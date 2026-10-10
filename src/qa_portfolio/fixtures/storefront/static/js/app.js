@@ -1,156 +1,336 @@
-/* DemoMart storefront — client behaviour against the FastAPI fixture. */
+/* ==========================================================================
+   Azam Trading Store — storefront client behaviour
+   ========================================================================== */
 
-const api = async (path, options = {}) => {
-  const res = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  let body = {};
-  try { body = await res.json(); } catch (_) { /* ignore */ }
-  return { ok: res.ok, status: res.status, body };
-};
+(() => {
+  "use strict";
 
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-/* ---------- session ------------------------------------------------------- */
+  const api = async (path, options = {}) => {
+    const res = await fetch(path, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      ...options,
+    });
+    let body = {};
+    try { body = await res.json(); } catch (_) { /* empty body is valid */ }
+    return { ok: res.ok, status: res.status, body };
+  };
 
-async function refreshSession() {
-  const { body } = await api("/api/session");
-  const authed = Boolean(body.authenticated);
-  const badge = $("#login-state");
-  badge.textContent = authed ? `Signed in · ${body.name}` : "Signed out";
-  badge.dataset.auth = String(authed);
-  $("#open-login").hidden = authed;
-  $("#logout").hidden = !authed;
-}
+  const escapeHtml = (value) =>
+    String(value).replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;",
+    }[ch]));
 
-/* ---------- catalogue ----------------------------------------------------- */
+  const formatPrice = (value) => Number(value).toFixed(2);
 
-async function refreshProducts(query = "") {
-  const url = query ? `/api/products?q=${encodeURIComponent(query)}` : "/api/products";
-  const { body } = await api(url);
-  renderProducts(body.items || []);
-  $("#product-count").textContent = `${body.count ?? 0} products`;
-}
+  /* ---------- state -------------------------------------------------- */
 
-function renderProducts(items) {
-  const list = $("#product-list");
-  list.innerHTML = "";
-  for (const p of items) {
-    const li = document.createElement("li");
-    li.className = "product-card";
-    li.dataset.name = p.name;
-    li.dataset.id = String(p.id);
-    li.innerHTML = `
-      <div class="product-media" aria-hidden="true"><span class="product-sku">${p.sku}</span></div>
-      <div class="product-body">
-        <p class="product-category">${p.category}</p>
-        <h3 class="product-name">${p.name}</h3>
-        <p class="product-description">${p.description}</p>
-        <div class="product-footer">
-          <span class="product-price">$${p.price.toFixed(2)}</span>
-          ${p.stock > 0
-            ? `<button class="btn btn-primary add" data-id="${p.id}">Add to cart</button>`
-            : `<button class="btn btn-disabled" disabled>Out of stock</button>`}
+  const state = {
+    products: [],
+    activeCategory: "All",
+    query: "",
+    session: { authenticated: false, name: null },
+  };
+
+  /* ---------- catalogue rendering ------------------------------------ */
+
+  const productListEl = $("#product-list");
+  const productCountEl = $("#product-count");
+  const noProductsEl = $("#no-products");
+
+  const renderProduct = (product) => {
+    const isOut = product.stock === 0;
+    const badge = isOut
+      ? `<span class="product-badge">Sold out</span>`
+      : product.featured
+        ? `<span class="product-badge product-badge--featured">Selected</span>`
+        : "";
+
+    const action = isOut
+      ? `<button class="btn btn-disabled btn-sm" disabled type="button">Unavailable</button>`
+      : `<button class="btn btn-primary btn-sm add" data-id="${product.id}" type="button">Add to basket</button>`;
+
+    return `
+      <li
+        class="product-card${product.featured ? " is-featured" : ""}"
+        data-name="${escapeHtml(product.name)}"
+        data-id="${product.id}"
+        data-category="${escapeHtml(product.category)}">
+        <div class="product-media">
+          <a href="/product/${product.id}" aria-label="${escapeHtml(product.name)}">
+            <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy" width="400" height="300">
+          </a>
+          ${badge}
         </div>
-      </div>`;
-    list.appendChild(li);
-  }
-  $("#no-products").hidden = items.length !== 0;
-}
+        <div class="product-body">
+          <p class="product-category">${escapeHtml(product.category)}</p>
+          <h3 class="product-name"><a href="/product/${product.id}">${escapeHtml(product.name)}</a></h3>
+          <p class="product-description">${escapeHtml(product.description)}</p>
+          <dl class="product-specs">
+            <div class="product-spec"><dt>Origin</dt><dd>${escapeHtml(product.origin || "—")}</dd></div>
+            <div class="product-spec"><dt>Material</dt><dd>${escapeHtml(product.material || "—")}</dd></div>
+          </dl>
+          <div class="product-footer">
+            <span class="product-price"><span class="product-price-currency">$</span>${formatPrice(product.price)}</span>
+            ${action}
+          </div>
+        </div>
+      </li>`;
+  };
 
-/* ---------- cart ---------------------------------------------------------- */
-
-async function refreshCart() {
-  const { body } = await api("/api/cart");
-  $("#cart-count").textContent = String(body.count ?? 0);
-  $("#cart-total").textContent = (body.total ?? 0).toFixed(2);
-  const list = $("#cart-items");
-  list.innerHTML = "";
-  for (const item of body.items || []) {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <span>${item.name} <span class="qty">×${item.quantity}</span></span>
-      <span>$${(item.price * item.quantity).toFixed(2)}</span>`;
-    list.appendChild(li);
-  }
-  $("#cart-empty").hidden = (body.items || []).length !== 0;
-}
-
-/* ---------- event wiring -------------------------------------------------- */
-
-function setStatus(el, text, kind = "") {
-  el.textContent = text;
-  el.classList.remove("is-error", "is-success");
-  if (kind) el.classList.add(kind);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Login dialog
-  const dialog = $("#login-dialog");
-  $("#open-login").addEventListener("click", () => dialog.showModal());
-  $$("[data-close]").forEach((b) => b.addEventListener("click", () => dialog.close()));
-
-  $("#login-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = $("#email").value;
-    const password = $("#password").value;
-    const { ok, body } = await api("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
+  const visibleProducts = () => {
+    const needle = state.query.trim().toLowerCase();
+    return state.products.filter((p) => {
+      const matchesCategory = state.activeCategory === "All" || p.category === state.activeCategory;
+      const matchesQuery = !needle || p.name.toLowerCase().includes(needle);
+      return matchesCategory && matchesQuery;
     });
-    const errorBox = $("#login-error");
-    if (!ok) {
-      errorBox.textContent = "Invalid email or password.";
-      errorBox.hidden = false;
-      return;
+  };
+
+  const renderCatalogue = () => {
+    if (!productListEl) return;
+    const items = visibleProducts();
+    productListEl.innerHTML = items.map(renderProduct).join("");
+    if (noProductsEl) noProductsEl.hidden = items.length !== 0;
+    if (productCountEl) {
+      productCountEl.innerHTML = `
+        <span class="section-count-num">${items.length}</span>
+        <span class="section-count-label">${items.length === 1 ? "item" : "items"}</span>`;
     }
-    errorBox.hidden = true;
-    dialog.close();
-    await refreshSession();
-    await refreshCart();
-  });
+  };
 
-  $("#logout").addEventListener("click", async () => {
-    await api("/api/logout", { method: "POST" });
-    await refreshSession();
-  });
+  /* ---------- session ------------------------------------------------ */
 
-  // Cart drawer
-  const drawer = $("#cart-drawer");
-  $("#open-cart").addEventListener("click", () => drawer.setAttribute("aria-hidden", "false"));
-  $("#close-cart").addEventListener("click", () => drawer.setAttribute("aria-hidden", "true"));
+  const sessionBadge = $("#login-state");
+  const loginTrigger = $("#open-login");
+  const logoutTrigger = $("#logout");
 
-  // Add to cart
-  $("#product-list").addEventListener("click", async (e) => {
-    const btn = e.target.closest(".add");
-    if (!btn) return;
-    await api("/api/cart/items", {
-      method: "POST",
-      body: JSON.stringify({ product_id: Number(btn.dataset.id) }),
+  const refreshSession = async () => {
+    const { body } = await api("/api/session");
+    state.session = body;
+    const authed = Boolean(body.authenticated);
+    if (sessionBadge) {
+      sessionBadge.textContent = authed ? (body.name || "Signed in") : "Guest";
+      sessionBadge.dataset.auth = String(authed);
+    }
+    if (loginTrigger) loginTrigger.hidden = authed;
+    if (logoutTrigger) logoutTrigger.hidden = !authed;
+  };
+
+  /* ---------- cart --------------------------------------------------- */
+
+  const cartCountEl = $("#cart-count");
+  const cartTotalEl = $("#cart-total");
+  const cartItemsEl = $("#cart-items");
+  const cartEmptyEl = $("#cart-empty");
+  const cartDrawer = $("#cart-drawer");
+
+  const refreshCart = async () => {
+    const { body } = await api("/api/cart");
+    const items = body.items || [];
+    if (cartCountEl) cartCountEl.textContent = String(body.count ?? 0);
+    if (cartTotalEl) cartTotalEl.textContent = formatPrice(body.total ?? 0);
+    if (cartItemsEl) {
+      cartItemsEl.innerHTML = items.map((item) => `
+        <li>
+          <span>${escapeHtml(item.name)}<span class="qty">× ${item.quantity}</span></span>
+          <strong>$${formatPrice(item.price * item.quantity)}</strong>
+        </li>`).join("");
+    }
+    if (cartEmptyEl) cartEmptyEl.hidden = items.length !== 0;
+  };
+
+  const openCart = () => {
+    if (cartDrawer) {
+      cartDrawer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  const closeCart = () => {
+    if (cartDrawer) {
+      cartDrawer.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+  };
+
+  /* ---------- login dialog ------------------------------------------- */
+
+  const dialog = $("#login-dialog");
+  const loginForm = $("#login-form");
+  const loginError = $("#login-error");
+
+  const openDialog = () => dialog?.showModal();
+  const closeDialog = () => dialog?.close();
+
+  /* ---------- filter chips ------------------------------------------- */
+
+  const initFilters = () => {
+    $$(".filter-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const category = chip.dataset.category || "All";
+        state.activeCategory = category;
+        $$(".filter-chip").forEach((c) => {
+          const active = c === chip;
+          c.classList.toggle("is-active", active);
+          c.setAttribute("aria-pressed", String(active));
+        });
+        renderCatalogue();
+      });
     });
-    await refreshCart();
-  });
+  };
 
-  // Checkout
-  $("#checkout").addEventListener("click", async () => {
-    const { ok, body } = await api("/api/checkout", { method: "POST" });
-    const status = $("#message");
-    setStatus(status, body.message || "", ok ? "is-success" : "is-error");
-  });
+  /* ---------- search ------------------------------------------------- */
 
-  // Search
-  let debounce;
-  $("#search").addEventListener("input", (e) => {
-    clearTimeout(debounce);
-    debounce = setTimeout(() => refreshProducts(e.target.value), 180);
-  });
+  const initSearch = () => {
+    const input = $("#search");
+    if (!input) return;
+    let debounce;
+    input.addEventListener("input", (e) => {
+      clearTimeout(debounce);
+      const value = e.target.value;
+      debounce = setTimeout(() => {
+        state.query = value;
+        renderCatalogue();
+      }, 150);
+    });
+  };
 
-  // Boot
-  (async () => {
-    await refreshProducts();
-    await refreshCart();
-    await refreshSession();
-  })();
-});
+  /* ---------- product detail page ------------------------------------ */
+
+  const initProductDetail = () => {
+    const form = document.getElementById("product-form");
+    if (!form) return;
+
+    const quantity = document.getElementById("quantity");
+    const productId = Number(form.dataset.id);
+
+    document.querySelectorAll(".quantity-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const step = Number(btn.dataset.step);
+        const current = Number(quantity.value) || 1;
+        const max = Number(quantity.max) || 999;
+        const next = Math.min(Math.max(current + step, 1), max);
+        quantity.value = String(next);
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const qty = Math.max(1, Number(quantity.value) || 1);
+      const button = document.getElementById("add-to-basket");
+      if (button) button.disabled = true;
+      try {
+        for (let i = 0; i < qty; i += 1) {
+          await api("/api/cart/items", {
+            method: "POST",
+            body: JSON.stringify({ product_id: productId }),
+          });
+        }
+        await refreshCart();
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  };
+
+  /* ---------- global event wiring ------------------------------------ */
+
+  const wireEvents = () => {
+    loginTrigger?.addEventListener("click", openDialog);
+    $$("[data-close]").forEach((btn) =>
+      btn.addEventListener("click", () => closeDialog())
+    );
+
+    loginForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#email").value;
+      const password = $("#password").value;
+      const { ok } = await api("/api/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      if (!ok) {
+        if (loginError) {
+          loginError.textContent = "Invalid email or password.";
+          loginError.hidden = false;
+        }
+        return;
+      }
+      if (loginError) loginError.hidden = true;
+      closeDialog();
+      await Promise.all([refreshSession(), refreshCart()]);
+    });
+
+    logoutTrigger?.addEventListener("click", async () => {
+      await api("/api/logout", { method: "POST" });
+      await Promise.all([refreshSession(), refreshCart()]);
+    });
+
+    $("#open-cart")?.addEventListener("click", openCart);
+    $("#close-cart")?.addEventListener("click", closeCart);
+
+    cartDrawer?.addEventListener("click", (e) => {
+      if (e.target === cartDrawer) closeCart();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (cartDrawer?.getAttribute("aria-hidden") === "false") closeCart();
+      }
+    });
+
+    // Add-to-basket buttons on the catalogue and related product cards
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".add");
+      if (!btn) return;
+      e.preventDefault();
+      btn.disabled = true;
+      try {
+        await api("/api/cart/items", {
+          method: "POST",
+          body: JSON.stringify({ product_id: Number(btn.dataset.id) }),
+        });
+        await refreshCart();
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    $("#checkout")?.addEventListener("click", async () => {
+      const { ok, body } = await api("/api/checkout", { method: "POST" });
+      const status = $("#message");
+      if (!status) return;
+      status.textContent = body.message || "";
+      status.classList.toggle("is-error", !ok);
+      status.classList.toggle("is-success", ok);
+    });
+  };
+
+  /* ---------- boot --------------------------------------------------- */
+
+  const init = async () => {
+    initFilters();
+    initSearch();
+    initProductDetail();
+    wireEvents();
+
+    if (productListEl) {
+      const { body } = await api("/api/products");
+      state.products = body.items || [];
+      renderCatalogue();
+    }
+
+    await Promise.all([refreshSession(), refreshCart()]);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

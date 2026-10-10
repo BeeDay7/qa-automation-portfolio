@@ -9,7 +9,14 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from .data import PRODUCTS, STORE, USERS
+from .data import (
+    CATEGORIES,
+    FOUNDING,
+    PRINCIPLES,
+    PRODUCTS,
+    STORE,
+    USERS,
+)
 from .models import AddItemRequest, CartItem, CartView, LoginRequest, Product
 
 BASE_DIR = Path(__file__).parent
@@ -19,17 +26,53 @@ router = APIRouter()
 CART_KEY = "cart"
 USER_KEY = "user_email"
 
+CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)  # exclude the synthetic "All"
+
+
+def _base_context(request: Request) -> dict[str, Any]:
+    """Common template context every page needs."""
+    return {
+        "store": STORE,
+        "categories": CATEGORIES,
+        "category_count": CATEGORY_COUNT,
+        "FOUNDING": FOUNDING,
+        "PRINCIPLES": PRINCIPLES,
+    }
+
 
 # ---------- pages ----------
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"products": PRODUCTS, "store": STORE},
-    )
+    ctx = _base_context(request)
+    ctx["products"] = PRODUCTS
+    return templates.TemplateResponse(request=request, name="index.html", context=ctx)
+
+
+@router.get("/product/{product_id}", response_class=HTMLResponse, include_in_schema=False)
+async def product_detail(request: Request, product_id: int) -> HTMLResponse:
+    product = next((p for p in PRODUCTS if p["id"] == product_id), None)
+    if product is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="not_found.html",
+            context={**_base_context(request), "message": "That item is no longer on our shelves."},
+            status_code=404,
+        )
+
+    related = [
+        p for p in PRODUCTS if p["category"] == product["category"] and p["id"] != product["id"]
+    ][:3]
+
+    if len(related) < 3:
+        extras = [p for p in PRODUCTS if p["id"] != product["id"] and p not in related]
+        related.extend(extras[: 3 - len(related)])
+
+    ctx = _base_context(request)
+    ctx["product"] = product
+    ctx["related"] = related
+    return templates.TemplateResponse(request=request, name="product.html", context=ctx)
 
 
 # ---------- session ----------

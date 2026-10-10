@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Not found — {{ store.name }}{% endblock %}
+{% block page_id %}not-found{% endblock %}
+
+{% block content %}
+<section class="not-found">
+  <div class="container not-found-inner">
+    <p class="eyebrow">A blank page</p>
+    <h1 class="not-found-title">That item is not on our shelves.</h1>
+    <p class="not-found-body">
+      {{ message or "Whatever you were looking for, we do not have it in the house right now." }}
+    </p>
+    <a class="btn btn-primary" href="/">Return to the catalogue</a>
+  </div>
+</section>
+{% endblock %}

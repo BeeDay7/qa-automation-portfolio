@@ -18,10 +18,9 @@ configure_logging(SECUREPORTAL.log_level, service="secureportal")
 BASE_DIR = Path(__file__).parent
 
 app = FastAPI(
-    title="SecurePortal Fixture",
+    title="SecurePortal — Session API",
     version="1.0.0",
-    docs_url=None,
-    redoc_url=None,
+    description="Authentication and session API for the SecurePortal fixture.",
 )
 app.add_middleware(
     SessionMiddleware,

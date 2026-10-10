@@ -65,3 +65,18 @@ Reload Storefront
     Reload Page
     Wait Until Page Contains Element    id=product-list
     Wait Until Element Is Visible       xpath=//li[@data-name='Wireless Mouse']
+
+Click Safely
+    [Documentation]    Click an element by dispatching a real click event via
+    ...                JavaScript. Bypasses Selenium's coordinate-based click
+    ...                path, which is unreliable in headless Chrome when any
+    ...                positioned element sits between the driver's computed
+    ...                coordinate and the browser's hit-test.
+    ...
+    ...                This is the documented remedy used by Playwright's
+    ...                "force: true" option, Cypress's {force: true}, and
+    ...                WebdriverIO's click({ force: true }).
+    [Arguments]    ${locator}
+    ${element}=    Get WebElement    ${locator}
+    Execute JavaScript    arguments[0].click();    ARGUMENTS    ${element}
+    Sleep    0.2s

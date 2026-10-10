@@ -1,11 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#c7d2fe"/>
-  </linearGradient></defs>
-  <rect width="400" height="300" fill="url(#g)"/>
-  <path d="M90 190 Q90 90 200 90 Q310 90 310 190" stroke="#1e293b" stroke-width="14" fill="none" stroke-linecap="round"/>
-  <rect x="70" y="170" width="50" height="90" rx="20" fill="#1e293b"/>
-  <rect x="280" y="170" width="50" height="90" rx="20" fill="#1e293b"/>
-  <circle cx="95" cy="215" r="8" fill="#4f46e5"/>
-  <circle cx="305" cy="215" r="8" fill="#4f46e5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Over-ear headphones">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf8f1"/><stop offset="1" stop-color="#f4ecdb"/>
+    </linearGradient>
+    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2624"/><stop offset="1" stop-color="#141110"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <ellipse cx="200" cy="245" rx="140" ry="12" fill="#1a1614" opacity="0.13"/>
+  <path d="M90 175 Q90 80 200 80 Q310 80 310 175" stroke="#2a2624" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M90 175 Q90 80 200 80 Q310 80 310 175" stroke="#3d3634" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <rect x="62" y="160" width="58" height="90" rx="26" fill="url(#cup)"/>
+  <rect x="280" y="160" width="58" height="90" rx="26" fill="url(#cup)"/>
+  <circle cx="91" cy="205" r="18" fill="#0d3b2e"/>
+  <circle cx="309" cy="205" r="18" fill="#0d3b2e"/>
+  <circle cx="91" cy="205" r="8" fill="#b8860b"/>
+  <circle cx="309" cy="205" r="8" fill="#b8860b"/>
 </svg>

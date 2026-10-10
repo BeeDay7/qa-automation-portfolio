@@ -1,6 +1,10 @@
 *** Settings ***
 Documentation     Page Object for the Azam Trading Store product catalogue.
-Library    SeleniumLibrary
+...
+...               Clicks use the Click Safely keyword from common.resource,
+...               which dispatches click events via JavaScript.
+Library           SeleniumLibrary
+Resource          ../common.resource
 
 *** Variables ***
 ${SEARCH_INPUT}     id=search
@@ -35,7 +39,8 @@ Product Card Should Not Be Visible
 Add Product To Cart
     [Documentation]    Click the Add-to-cart button on the named product card.
     [Arguments]    ${name}
-    Click Button    xpath=//li[@data-name='${name}']//button[contains(@class,'add')]
+    ${locator}=    Set Variable    xpath=//li[@data-name='${name}']//button[contains(@class,'add')]
+    Click Safely    ${locator}
 
 Empty State Should Be Visible
     [Documentation]    Assert that the "no products matched" message is

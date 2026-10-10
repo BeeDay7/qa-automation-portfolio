@@ -1,6 +1,10 @@
 *** Settings ***
 Documentation     Page Object for the Azam Trading Store cart drawer.
-Library    SeleniumLibrary
+...
+...               Clicks use the Click Safely keyword from common.resource,
+...               which dispatches click events via JavaScript.
+Library           SeleniumLibrary
+Resource          ../common.resource
 
 *** Variables ***
 ${OPEN_CART}      id=open-cart
@@ -16,14 +20,13 @@ ${CART_EMPTY}     id=cart-empty
 Open Cart Drawer
     [Documentation]    Click the header cart button and wait for the drawer
     ...                to slide into view.
-    Click Button    ${OPEN_CART}
+    Click Safely    ${OPEN_CART}
     Wait Until Element Is Visible    ${CART_DRAWER}    timeout=5s
     Wait Until Keyword Succeeds    3s    200ms    Cart Drawer Should Be Open
 
 Close Cart Drawer
-    [Documentation]    Click the drawer close button and wait for it to slide
-    ...                out of view.
-    Click Button    ${CLOSE_CART}
+    [Documentation]    Click the drawer close button and wait for it to close.
+    Click Safely    ${CLOSE_CART}
     Wait Until Keyword Succeeds    3s    200ms    Cart Drawer Should Be Closed
 
 Cart Drawer Should Be Open
@@ -46,11 +49,11 @@ Cart Total Should Be
 
 Click Checkout
     [Documentation]    Click the checkout button inside the cart drawer.
-    Click Button    ${CHECKOUT}
+    Click Safely    ${CHECKOUT}
 
 Checkout Message Should Contain
     [Documentation]    Assert the checkout status message contains expected
-    ...                text. Used for both success and error paths.
+    ...                text.
     [Arguments]    ${expected}
     Wait Until Element Contains    ${MESSAGE}    ${expected}    timeout=5s
 

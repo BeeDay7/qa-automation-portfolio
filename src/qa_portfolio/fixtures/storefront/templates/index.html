@@ -1,71 +1,218 @@
 {% extends "base.html" %}
-{% block title %}{{ store.name }} — Shop{% endblock %}
+
+{% block title %}{{ store.name }} — {{ store.tagline }}{% endblock %}
+{% block description %}{{ store.subhead }}{% endblock %}
 {% block page_id %}shop{% endblock %}
 
 {% block content %}
-<section class="hero">
+
+<!-- ==================================================================
+     Hero — the title page of the ledger
+     ================================================================== -->
+<section class="hero" aria-labelledby="hero-title">
   <div class="container hero-inner">
-    <div class="hero-text">
-      <span class="hero-eyebrow">Trusted since 2019 · {{ store.address }}</span>
-      <h1 class="hero-title">{{ store.tagline }}</h1>
-      <p class="hero-lede">
-        {{ store.name }} supplies tested electronics and office essentials to
-        customers across West Africa. Every item ships from Abuja.
-      </p>
-      <div class="hero-search">
-        <label for="search" class="sr-only">Search products</label>
-        <input id="search" type="search" placeholder="Search the catalogue…" autocomplete="off">
-      </div>
+
+    <div class="hero-copy">
+      <p class="eyebrow">Est. {{ store.established }} · {{ store.address }}</p>
+
+      <h1 id="hero-title" class="hero-title">
+        {{ store.tagline }}
+      </h1>
+
+      <p class="hero-lede">{{ store.subhead }}</p>
+
+      <form class="hero-search" role="search" onsubmit="return false;">
+        <label for="search" class="sr-only">Search the catalogue</label>
+        <div class="hero-search-field">
+          <svg class="hero-search-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <input
+            id="search"
+            type="search"
+            placeholder="Search the catalogue"
+            autocomplete="off"
+            aria-describedby="search-hint">
+        </div>
+        <span id="search-hint" class="sr-only">Results filter as you type</span>
+      </form>
+
+      <ul class="hero-marks" aria-label="House facts">
+        <li>
+          <span class="hero-mark-num">{{ products | length }}</span>
+          <span class="hero-mark-label">items in stock</span>
+        </li>
+        <li>
+          <span class="hero-mark-num">{{ categories | length - 1 }}</span>
+          <span class="hero-mark-label">categories</span>
+        </li>
+        <li>
+          <span class="hero-mark-num">{{ store.established }}</span>
+          <span class="hero-mark-label">since</span>
+        </li>
+      </ul>
     </div>
+
+    <aside class="hero-aside" aria-hidden="true">
+      <div class="hero-seal">
+        <span class="hero-seal-mark">{{ store.brand_mark }}</span>
+        <span class="hero-seal-rule"></span>
+        <span class="hero-seal-text">{{ store.address }}</span>
+      </div>
+      <p class="hero-seal-caption">
+        A working house.<br>
+        Every item held,<br>
+        every promise kept.
+      </p>
+    </aside>
+
   </div>
 </section>
 
-<section id="catalogue" class="catalogue">
+<!-- ==================================================================
+     Catalogue — the merchant's index
+     ================================================================== -->
+<section id="catalogue" class="catalogue" aria-labelledby="catalogue-heading">
   <div class="container">
-    <div class="section-header">
-      <h2>Catalogue</h2>
-      <span id="product-count" class="muted">{{ products | length }} products</span>
-    </div>
 
-    <ul id="product-list" class="product-grid">
+    <header class="section-header">
+      <div class="section-heading">
+        <p class="eyebrow">The Collection</p>
+        <h2 id="catalogue-heading">Everything we currently hold</h2>
+      </div>
+      <p id="product-count" class="section-count" aria-live="polite">
+        <span class="section-count-num">{{ products | length }}</span>
+        <span class="section-count-label">items</span>
+      </p>
+    </header>
+
+    <nav class="filter-bar" aria-label="Filter the collection by category">
+      {% for category in categories %}
+        <button
+          type="button"
+          class="filter-chip{% if category.key == 'All' %} is-active{% endif %}"
+          data-category="{{ category.key }}"
+          aria-pressed="{% if category.key == 'All' %}true{% else %}false{% endif %}">
+          <span class="filter-chip-label">{{ category.label }}</span>
+          <span class="filter-chip-blurb">{{ category.blurb }}</span>
+        </button>
+      {% endfor %}
+    </nav>
+
+    <ul id="product-list" class="product-grid" role="list">
       {% for product in products %}
-      <li class="product-card" data-name="{{ product.name }}" data-id="{{ product.id }}">
+      <li
+        class="product-card{% if product.featured %} is-featured{% endif %}"
+        data-name="{{ product.name }}"
+        data-id="{{ product.id }}"
+        data-category="{{ product.category }}">
+
         <div class="product-media">
-          <img src="{{ product.image }}" alt="{{ product.name }}" loading="lazy">
+          <img
+            src="{{ product.image }}"
+            alt="{{ product.name }}"
+            loading="lazy"
+            width="400"
+            height="300">
           {% if product.stock == 0 %}
-            <span class="product-badge product-badge--out">Out of stock</span>
+            <span class="product-badge">Sold out</span>
+          {% elif product.featured %}
+            <span class="product-badge product-badge--featured">Selected</span>
           {% endif %}
         </div>
+
         <div class="product-body">
           <p class="product-category">{{ product.category }}</p>
           <h3 class="product-name">{{ product.name }}</h3>
           <p class="product-description">{{ product.description }}</p>
+
+          <dl class="product-specs">
+            <div class="product-spec">
+              <dt>Origin</dt>
+              <dd>{{ product.origin }}</dd>
+            </div>
+            <div class="product-spec">
+              <dt>Material</dt>
+              <dd>{{ product.material }}</dd>
+            </div>
+          </dl>
+
           <div class="product-footer">
-            <span class="product-price">${{ "%.2f"|format(product.price) }}</span>
+            <span class="product-price">
+              <span class="product-price-currency">$</span>{{ "%.2f"|format(product.price) }}
+            </span>
             {% if product.stock > 0 %}
-              <button class="btn btn-primary add" data-id="{{ product.id }}">Add to cart</button>
+              <button
+                class="btn btn-primary btn-sm add"
+                data-id="{{ product.id }}"
+                type="button">
+                Add to basket
+              </button>
             {% else %}
-              <button class="btn btn-disabled" disabled>Unavailable</button>
+              <button
+                class="btn btn-disabled btn-sm"
+                disabled
+                type="button">Unavailable</button>
             {% endif %}
           </div>
         </div>
+
       </li>
       {% endfor %}
     </ul>
 
-    <p id="no-products" class="empty-state" hidden>No products matched your search.</p>
+    <p id="no-products" class="empty-state" hidden>
+      <span class="empty-state-mark">◦</span>
+      <span class="empty-state-text">Nothing matched your search.</span>
+      <span class="empty-state-hint">Try a different word, or clear the search to see the full collection.</span>
+    </p>
+
   </div>
 </section>
 
-<section id="about" class="about">
+<!-- ==================================================================
+     Our House — the founding story
+     ================================================================== -->
+<section id="house" class="about" aria-labelledby="about-heading">
   <div class="container about-inner">
-    <h2>About {{ store.name }}</h2>
-    <p>
-      We are an Abuja-based electronics and accessories retailer serving
-      individuals, small businesses and institutions. Every product in this
-      catalogue is a test fixture — but every interaction with the storefront
-      is real, and every test that runs against it is a real test.
-    </p>
+
+    <div class="about-copy">
+      <p class="eyebrow">{{ FOUNDING.eyebrow if FOUNDING is defined else "Our House" }}</p>
+      <h2 id="about-heading" class="about-title">
+        {{ FOUNDING.headline if FOUNDING is defined else "Founded on a simple promise." }}
+      </h2>
+      <p class="about-body">
+        {{ FOUNDING.body if FOUNDING is defined else "" }}
+      </p>
+
+      <p class="about-signature">
+        <span class="about-signature-name">{{ FOUNDING.signature if FOUNDING is defined else "" }}</span>
+        <span class="about-signature-role">{{ FOUNDING.signature_role if FOUNDING is defined else "" }}</span>
+      </p>
+
+      <p class="about-meta">
+        <span>{{ store.address }}</span>
+        <span aria-hidden="true">·</span>
+        <span>Since {{ store.established }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ store.opening_hours }}</span>
+      </p>
+    </div>
+
+    <ol class="principles" aria-label="House principles">
+      {% for principle in principles %}
+      <li class="principle">
+        <span class="principle-number" aria-hidden="true">{{ principle.number }}</span>
+        <div class="principle-body">
+          <h3 class="principle-title">{{ principle.title }}</h3>
+          <p class="principle-text">{{ principle.body }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+
   </div>
 </section>
+
 {% endblock %}

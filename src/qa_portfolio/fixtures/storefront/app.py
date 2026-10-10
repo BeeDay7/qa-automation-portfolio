@@ -22,10 +22,9 @@ configure_logging(STOREFRONT.log_level, service="storefront")
 BASE_DIR = Path(__file__).parent
 
 app = FastAPI(
-    title="DemoMart Storefront Fixture",
+    title="Azam Trading Store — Registry API",
     version="1.0.0",
-    docs_url=None,
-    redoc_url=None,
+    description="Read-only registry API for the Azam Trading Store fixture.",
 )
 
 app.add_middleware(

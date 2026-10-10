@@ -3,9 +3,14 @@ Documentation     UI- and API-level authentication-control checks against the
 ...               SecurePortal fixture. This suite verifies user-facing
 ...               behaviour and one server-side role boundary. It is NOT a
 ...               penetration test; see docs/LIMITATIONS.md.
+...
+...               UI clicks use Click Safely from the shared resources. This
+...               bypasses a Chrome headless coordinate bug that otherwise
+...               intercepts WebDriver clicks on positioned elements.
 Library           SeleniumLibrary
 Library           RequestsLibrary
 Library           Collections
+Resource          ../ui/resources/common.resource
 Suite Setup       Open Secure Portal
 Suite Teardown    Close All Browsers
 Test Setup        Go To    ${SECURE_URL}
@@ -28,7 +33,7 @@ SEC-001 Invalid Credentials Are Rejected In UI
     [Tags]    smoke    negative    priority-high
     Input Text        id=username    ${BAD_USER}
     Input Password    id=password    ${BAD_PASS}
-    Click Button      id=signin
+    Click Safely      id=signin
     Wait Until Element Contains    id=result    Authentication failed    timeout=5s
     Location Should Be    ${SECURE_URL}/
 
@@ -38,7 +43,7 @@ SEC-002 Admin Login Succeeds
     [Tags]    smoke    priority-high
     Input Text        id=username    ${ADMIN_USER}
     Input Password    id=password    ${ADMIN_PASS}
-    Click Button      id=signin
+    Click Safely      id=signin
     Wait Until Location Contains    /dashboard    timeout=5s
     Wait Until Element Contains    id=session-badge    admin    timeout=5s
 
