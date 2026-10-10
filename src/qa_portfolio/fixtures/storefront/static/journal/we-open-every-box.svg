@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A parcel opened on a bench, the lid folded back, tissue paper visible inside">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf8f1"/>
+      <stop offset="1" stop-color="#f4ecdb"/>
+    </linearGradient>
+    <linearGradient id="boxbody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9a35a"/>
+      <stop offset="1" stop-color="#a67f3d"/>
+    </linearGradient>
+    <linearGradient id="boxlid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dab877"/>
+      <stop offset="1" stop-color="#b89253"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#1a1614" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#1a1614" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+
+  <!-- Bench surface -->
+  <rect x="0" y="620" width="1600" height="280" fill="#e9dfc7"/>
+  <rect x="0" y="620" width="1600" height="4" fill="#d4c9b1"/>
+
+  <!-- Cast shadow -->
+  <ellipse cx="800" cy="700" rx="380" ry="42" fill="url(#shadow)"/>
+
+  <!-- Box -->
+  <path d="M520 700 L520 380 L1080 380 L1080 700 Z" fill="url(#boxbody)"/>
+  <path d="M520 380 L1080 380 L1080 420 L520 420 Z" fill="#8f6a2e" opacity="0.35"/>
+  <path d="M520 700 L1080 700 L1080 720 L520 720 Z" fill="#8f6a2e" opacity="0.35"/>
+
+  <!-- Tissue paper peeking -->
+  <path d="M540 420 Q620 360 700 420 T 900 420 T 1060 420 L1060 500 L540 500 Z"
+        fill="#fbf8f1" opacity="0.92"/>
+  <path d="M560 470 Q700 400 800 470 T 1040 470"
+        fill="none" stroke="#e4dccb" stroke-width="3"/>
+
+  <!-- Open lid -->
+  <path d="M520 380 L480 300 Q470 280 490 275 L1080 275 L1080 380 Z" fill="url(#boxlid)"/>
+  <path d="M490 275 L1080 275 L1080 285 L490 285 Z" fill="#7a5a1f" opacity="0.3"/>
+
+  <!-- Twine -->
+  <path d="M620 700 Q680 640 740 700" fill="none" stroke="#8a6a34" stroke-width="6" stroke-linecap="round"/>
+  <path d="M520 540 Q800 500 1080 540" fill="none" stroke="#8a6a34" stroke-width="6" opacity="0.6"/>
+
+  <!-- Small product peeking out of tissue -->
+  <rect x="770" y="430" width="60" height="30" rx="6" fill="#1a1614"/>
+  <circle cx="800" cy="445" r="4" fill="#b8860b"/>
+</svg>

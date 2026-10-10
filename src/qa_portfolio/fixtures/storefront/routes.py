@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from .data import (
     CATEGORIES,
     FOUNDING,
+    JOURNAL,
     PRINCIPLES,
     PRODUCTS,
     STORE,
@@ -26,7 +27,7 @@ router = APIRouter()
 CART_KEY = "cart"
 USER_KEY = "user_email"
 
-CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)  # exclude the synthetic "All"
+CATEGORY_COUNT = max(len(CATEGORIES) - 1, 0)
 
 
 def _base_context(request: Request) -> dict[str, Any]:
@@ -101,6 +102,34 @@ async def account(request: Request) -> HTMLResponse:
     ctx["user"] = user
     ctx["basket"] = _cart_summary(request)
     return templates.TemplateResponse(request=request, name="account.html", context=ctx)
+
+
+@router.get("/journal", response_class=HTMLResponse, include_in_schema=False)
+async def journal_index(request: Request) -> HTMLResponse:
+    ctx = _base_context(request)
+    ctx["articles"] = JOURNAL
+    return templates.TemplateResponse(request=request, name="journal_index.html", context=ctx)
+
+
+@router.get("/journal/{slug}", response_class=HTMLResponse, include_in_schema=False)
+async def journal_article(request: Request, slug: str) -> HTMLResponse:
+    article = next((a for a in JOURNAL if a["slug"] == slug), None)
+    if article is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="not_found.html",
+            context={**_base_context(request), "message": "That note has not been written yet."},
+            status_code=404,
+        )
+
+    related_products = [p for p in PRODUCTS if p["id"] in article["product_ids"]]
+    other_articles = [a for a in JOURNAL if a["slug"] != slug]
+
+    ctx = _base_context(request)
+    ctx["article"] = article
+    ctx["related_products"] = related_products
+    ctx["other_articles"] = other_articles
+    return templates.TemplateResponse(request=request, name="journal_article.html", context=ctx)
 
 
 # ---------- session ----------

@@ -348,3 +348,180 @@ USERS: Final[dict[str, dict[str, str]]] = {
         "role": "customer",
     },
 }
+
+# -----------------------------------------------------------------------------
+# The Journal — notes from the keeper
+# -----------------------------------------------------------------------------
+
+JOURNAL: Final[list[dict[str, Any]]] = [
+    {
+        "slug": "we-open-every-box",
+        "title": "We open every box",
+        "eyebrow": "On inspection",
+        "standfirst": (
+            "Nothing reaches our shelves without passing through our own "
+            "hands. A short note on why that rule has never changed."
+        ),
+        "date_iso": "2026-09-14",
+        "date_display": "14 September 2026",
+        "reading_minutes": 4,
+        "author": "The Azam family",
+        "author_role": "Founders & Keepers",
+        "hero_image": "/static/journal/we-open-every-box.svg",
+        "body": [
+            (
+                "The first rule of the house is simple: we do not sell what "
+                "we have not held. Every box that arrives on our loading bay "
+                "is opened. Every item is taken out, turned over, and placed "
+                "on a workbench before it ever reaches a shelf. Some of them "
+                "never make it that far."
+            ),
+            (
+                "We started this in 2019 out of necessity. In the beginning, "
+                "we could not afford the volume of a big distributor, and "
+                "every wrong order hurt. So we opened everything, and we "
+                "learned which suppliers we could trust and which we could "
+                "not. The ones we could trust, we kept. The rest, we stopped "
+                "buying from."
+            ),
+            (
+                "The habit stuck. When a shipment of a hundred wireless mice "
+                "arrived last spring with a hundred and three units in it — "
+                "three extras, a small gift from the factory — we opened "
+                "every one of them anyway. Two of them rattled when we "
+                "picked them up. We sent the whole batch back. The supplier "
+                "was not happy. We did not care. Our customers were not "
+                "going to receive a mouse that rattled."
+            ),
+            (
+                "There is a version of this business where you sell whatever "
+                "arrives, apologise when it breaks, and replace it from a "
+                "margin that is already thin. We have watched other shops do "
+                "that. They do not last. The customer remembers. They tell "
+                "one person, and that person tells two more, and in three "
+                "years the shop is empty."
+            ),
+            (
+                "We would rather lose a sale than send something we would "
+                "not keep ourselves. That has been true since the first "
+                "unit we ever sold, and it will be true at the last one. "
+                "If you are ever uncertain whether something we stock is "
+                "worth the price, ask us. We will tell you the truth, "
+                "even when it costs us the order."
+            ),
+        ],
+        "product_ids": [1, 2, 6],
+    },
+    {
+        "slug": "fewer-better-things",
+        "title": "The case for fewer, better things",
+        "eyebrow": "On curation",
+        "standfirst": (
+            "Our catalogue is deliberately small. Here is why we keep it "
+            "that way, and why it will probably get smaller."
+        ),
+        "date_iso": "2026-08-22",
+        "date_display": "22 August 2026",
+        "reading_minutes": 5,
+        "author": "The Azam family",
+        "author_role": "Founders & Keepers",
+        "hero_image": "/static/journal/fewer-better-things.svg",
+        "body": [
+            (
+                "Eight items. That is the whole catalogue. Some shops of our "
+                "size carry a thousand. Some carry ten thousand. We carry "
+                "eight, and next year we will probably carry fewer."
+            ),
+            (
+                "There is a discipline that comes with refusing things. Every "
+                "item we add is an item that has to justify itself against "
+                "everything else on the shelf. Does it do something the "
+                "others do not? Is it better than the version we already "
+                "have? Would we recommend it over an item we stopped "
+                "stocking last year? If the answer is no, it does not come in."
+            ),
+            (
+                "The mechanical keyboard is a good example. We have sold "
+                "four different keyboards in the life of this shop. Every "
+                "one of them was good, and every one of them eventually lost "
+                "its place to a better version. The current board is the "
+                "fifth. It is the one we use ourselves. When the sixth "
+                "arrives — and it will — we will not keep both. The fifth "
+                "will come off the shelf."
+            ),
+            (
+                "This is not minimalism for its own sake. It is the "
+                "opposite. Minimalism as a style is another kind of "
+                "abundance — you can always buy more of the aesthetic. What "
+                "we are trying to do is harder: to know, without flinching, "
+                "which things are worth keeping and which are not."
+            ),
+            (
+                "You are welcome to disagree with any of our choices. If "
+                "you have used something better than what we stock, tell "
+                "us. We will buy it, test it, and if it wins, it goes on "
+                "the shelf. That is how the catalogue grows and how it "
+                "shrinks. And either direction is fine, so long as the "
+                "shelf is honest."
+            ),
+        ],
+        "product_ids": [3, 4, 7],
+    },
+    {
+        "slug": "wrapped-by-hand",
+        "title": "Wrapped by hand",
+        "eyebrow": "On sending",
+        "standfirst": (
+            "Paper, twine, and a short note. The small ceremony of every "
+            "parcel that leaves this house."
+        ),
+        "date_iso": "2026-07-30",
+        "date_display": "30 July 2026",
+        "reading_minutes": 3,
+        "author": "The Azam family",
+        "author_role": "Founders & Keepers",
+        "hero_image": "/static/journal/wrapped-by-hand.svg",
+        "body": [
+            (
+                "We wrap every order by hand. Not because we are slow, and "
+                "not because we are trying to be precious. Because it is "
+                "the last moment we have with a parcel before it belongs "
+                "to someone else, and it is the one moment when we can "
+                "still decide what kind of shop we want to be."
+            ),
+            (
+                "The paper is unbleached kraft, thin enough to fold "
+                "cleanly. The twine is natural jute, tied with a knot "
+                "tight enough to survive the post but loose enough to be "
+                "undone with one finger. Inside, on a small card, we write "
+                "the name of the person who packed the parcel, and the day "
+                "it was packed. There is no brand mark on the card. There "
+                "is no logo. There is just a name and a date."
+            ),
+            (
+                "When something goes wrong — when a parcel is late, or "
+                "when an item arrives damaged, or when we simply made a "
+                "mistake — the note is the first thing our customer sees. "
+                "We do not write a template. We write what actually "
+                "happened. Sometimes that means admitting we shipped the "
+                "wrong thing. Sometimes it means explaining that the "
+                "weather in Lagos was worse than usual and the courier "
+                "could not reach the airport on time."
+            ),
+            (
+                "This is the part of the business that scales worst. Every "
+                "wrapped parcel is a minute of one of our lives. When we "
+                "grow — and we are growing — we will have to decide "
+                "whether to keep this rule. I hope we do. I suspect we "
+                "will have to, because it is the one thing that makes "
+                "this shop recognisable as itself."
+            ),
+            (
+                "If a parcel from us ever reaches you, take a moment with "
+                "the note before you unwrap it. Somebody wrote that for "
+                "you specifically. It is small, but it is the whole point."
+            ),
+        ],
+        "product_ids": [5, 8],
+    },
+]

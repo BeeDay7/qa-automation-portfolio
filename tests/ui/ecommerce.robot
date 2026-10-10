@@ -17,6 +17,7 @@ Resource          resources/pages/login_page.resource
 Resource          resources/pages/products_page.resource
 Resource          resources/pages/cart_page.resource
 Resource          resources/pages/account_page.resource
+Resource          resources/pages/journal_page.resource
 Suite Setup       Open Storefront
 Suite Teardown    Close Storefront
 Test Setup        Reset Storefront Session
@@ -158,3 +159,33 @@ DM-014 Account Page Reflects Basket Count
     Go To Account Page
     Account Basket Count Should Be    2
     Account Basket Total Should Be    54.49
+
+DM-015 Journal Index Lists All Articles
+    [Documentation]    The journal index renders and shows all three
+    ...                published notes.
+    [Tags]    smoke    functional    priority-high    journal
+    Go To Journal Index
+    Journal Should Show Articles
+    Page Should Contain Element    xpath=//a[contains(@class,'journal-item-link')][.//h2[contains(., 'We open every box')]]
+    Page Should Contain Element    xpath=//a[contains(@class,'journal-item-link')][.//h2[contains(., 'The case for fewer')]]
+    Page Should Contain Element    xpath=//a[contains(@class,'journal-item-link')][.//h2[contains(., 'Wrapped by hand')]]
+
+DM-016 Article Opens With Full Body And Metadata
+    [Documentation]    Clicking a note on the index navigates to the article
+    ...                view, which shows the title, prose, and reading time.
+    [Tags]    smoke    functional    priority-high    journal
+    Go To Journal Index
+    Open Journal Article    We open every box
+    Article Title Should Be    We open every box
+    Article Should Have Body Content
+    Article Should Show Metadata
+
+DM-017 Article Shows Related Products And Other Notes
+    [Documentation]    Below the article, the related products section and
+    ...                the "other notes" list are present.
+    [Tags]    functional    priority-medium    journal
+    Go To Journal Index
+    Open Journal Article    Wrapped by hand
+    Article Title Should Be    Wrapped by hand
+    Wait Until Element Is Visible    css=.journal-related    timeout=5s
+    Other Notes Should Be Listed

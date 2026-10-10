@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A parcel wrapped in kraft paper and tied with twine, resting on a wooden bench">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf8f1"/>
+      <stop offset="1" stop-color="#f4ecdb"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9c9a4"/>
+      <stop offset="1" stop-color="#c1ae82"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#1a1614" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#1a1614" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+
+  <!-- Bench -->
+  <rect x="0" y="640" width="1600" height="260" fill="#e9dfc7"/>
+  <rect x="0" y="640" width="1600" height="4" fill="#d4c9b1"/>
+
+  <!-- Cast shadow -->
+  <ellipse cx="800" cy="700" rx="380" ry="36" fill="url(#shadow)"/>
+
+  <!-- Parcel -->
+  <rect x="500" y="380" width="600" height="280" fill="url(#paper)"/>
+  <rect x="500" y="380" width="600" height="10" fill="#b09b6e"/>
+  <rect x="500" y="650" width="600" height="10" fill="#8f7c52"/>
+
+  <!-- Fold line top -->
+  <path d="M500 420 L1100 420" fill="none" stroke="#a89166" stroke-width="2" opacity="0.5"/>
+
+  <!-- Twine horizontal -->
+  <path d="M500 500 L1100 500" fill="none" stroke="#7a5a1f" stroke-width="8"/>
+  <path d="M500 500 L1100 500" fill="none" stroke="#a67f3d" stroke-width="3"/>
+  <path d="M500 540 L1100 540" fill="none" stroke="#7a5a1f" stroke-width="8"/>
+  <path d="M500 540 L1100 540" fill="none" stroke="#a67f3d" stroke-width="3"/>
+
+  <!-- Twine vertical -->
+  <path d="M800 380 L800 660" fill="none" stroke="#7a5a1f" stroke-width="8"/>
+  <path d="M800 380 L800 660" fill="none" stroke="#a67f3d" stroke-width="3"/>
+
+  <!-- Bow / knot at intersection -->
+  <circle cx="800" cy="520" r="14" fill="#7a5a1f"/>
+  <path d="M786 520 Q760 500 740 520 Q760 540 786 520" fill="none" stroke="#a67f3d" stroke-width="4"/>
+  <path d="M814 520 Q840 500 860 520 Q840 540 814 520" fill="none" stroke="#a67f3d" stroke-width="4"/>
+
+  <!-- Small card peeking out from under the twine -->
+  <rect x="870" y="480" width="150" height="90" fill="#fbf8f1" transform="rotate(-4 870 480)"/>
+  <rect x="884" y="500" width="90" height="4" fill="#1a1614" opacity="0.5" transform="rotate(-4 870 480)"/>
+  <rect x="884" y="514" width="120" height="3" fill="#1a1614" opacity="0.35" transform="rotate(-4 870 480)"/>
+  <rect x="884" y="526" width="70" height="3" fill="#1a1614" opacity="0.35" transform="rotate(-4 870 480)"/>
+  <circle cx="930" cy="552" r="4" fill="#b8860b"/>
+</svg>

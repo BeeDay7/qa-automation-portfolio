@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A single shelf holding a few carefully chosen objects">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf8f1"/>
+      <stop offset="1" stop-color="#f4ecdb"/>
+    </linearGradient>
+    <linearGradient id="shelf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6a34"/>
+      <stop offset="1" stop-color="#5e4720"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+
+  <!-- Wall shadow -->
+  <rect x="200" y="140" width="1200" height="640" fill="#e9dfc7" opacity="0.35"/>
+
+  <!-- Shelf plank -->
+  <rect x="240" y="560" width="1120" height="40" fill="url(#shelf)"/>
+  <rect x="240" y="560" width="1120" height="4" fill="#a67f3d"/>
+
+  <!-- Object 1: small jar -->
+  <rect x="360" y="470" width="90" height="90" rx="6" fill="#1a1614"/>
+  <rect x="360" y="470" width="90" height="14" fill="#3d3634"/>
+  <circle cx="405" cy="515" r="12" fill="#b8860b"/>
+
+  <!-- Object 2: book -->
+  <rect x="560" y="440" width="140" height="120" rx="4" fill="#0d3b2e"/>
+  <rect x="560" y="440" width="8" height="120" fill="#b8860b"/>
+  <rect x="576" y="470" width="90" height="4" fill="#fbf8f1" opacity="0.4"/>
+  <rect x="576" y="486" width="60" height="4" fill="#fbf8f1" opacity="0.3"/>
+  <rect x="576" y="502" width="80" height="4" fill="#fbf8f1" opacity="0.3"/>
+
+  <!-- Object 3: small vessel -->
+  <path d="M800 560 Q790 460 830 440 Q870 460 860 560 Z" fill="#1a1614"/>
+  <path d="M800 560 Q790 460 830 440 Q870 460 860 560 Z" fill="none" stroke="#3d3634" stroke-width="2"/>
+
+  <!-- Object 4: nothing else on the shelf — deliberately empty space -->
+
+  <!-- Mark of the shelf number -->
+  <text x="1280" y="620" font-family="serif" font-style="italic" font-size="28" fill="#6f6862" text-anchor="end">one of eight</text>
+
+  <!-- Small bracket right side -->
+  <rect x="1340" y="560" width="20" height="40" fill="#5e4720"/>
+</svg>

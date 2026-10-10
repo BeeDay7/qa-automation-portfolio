@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} — The Journal — {{ store.name }}{% endblock %}
+{% block description %}{{ article.standfirst }}{% endblock %}
+{% block page_id %}journal-article{% endblock %}
+
+{% block content %}
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <div class="container breadcrumb-inner">
+    <a href="/">Home</a>
+    <span aria-hidden="true">/</span>
+    <a href="/journal">Journal</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{{ article.title }}</span>
+  </div>
+</nav>
+
+<article class="journal-article">
+
+  <header class="journal-article-header">
+    <div class="container journal-article-header-inner">
+      <p class="eyebrow">{{ article.eyebrow }}</p>
+      <h1 class="journal-article-title">{{ article.title }}</h1>
+      <p class="journal-article-standfirst">{{ article.standfirst }}</p>
+
+      <dl class="journal-article-meta">
+        <div>
+          <dt>Written</dt>
+          <dd>
+            <time datetime="{{ article.date_iso }}">{{ article.date_display }}</time>
+          </dd>
+        </div>
+        <div>
+          <dt>Reading</dt>
+          <dd>{{ article.reading_minutes }} minutes</dd>
+        </div>
+        <div>
+          <dt>By</dt>
+          <dd>
+            <span class="journal-article-author">{{ article.author }}</span>
+            <span class="journal-article-role">{{ article.author_role }}</span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <figure class="journal-article-hero">
+    <div class="container">
+      <img
+        src="{{ article.hero_image }}"
+        alt=""
+        width="1600"
+        height="900"
+        loading="eager">
+    </div>
+  </figure>
+
+  <div class="container journal-article-body">
+    <div class="journal-prose">
+      {% for paragraph in article.body %}
+      <p>{{ paragraph }}</p>
+      {% endfor %}
+
+      <p class="journal-signature">
+        <span class="journal-signature-line" aria-hidden="true"></span>
+        <span class="journal-signature-text">
+          Written at the bench, {{ article.date_display }}.
+        </span>
+      </p>
+    </div>
+  </div>
+
+  {% if related_products %}
+  <section class="journal-related" aria-labelledby="journal-related-heading">
+    <div class="container">
+      <header class="section-header">
+        <div class="section-heading">
+          <p class="eyebrow">Mentioned in this note</p>
+          <h2 id="journal-related-heading" class="journal-related-heading">
+            From the shelf
+          </h2>
+        </div>
+      </header>
+
+      <ul class="product-grid product-grid--related" role="list">
+        {% for product in related_products %}
+        <li
+          class="product-card"
+          data-name="{{ product.name }}"
+          data-id="{{ product.id }}">
+          <div class="product-media">
+            <a href="/product/{{ product.id }}" aria-label="{{ product.name }}">
+              <img
+                src="{{ product.image }}"
+                alt="{{ product.name }}"
+                loading="lazy"
+                width="400"
+                height="300">
+            </a>
+            {% if product.stock == 0 %}
+              <span class="product-badge">Sold out</span>
+            {% elif product.featured %}
+              <span class="product-badge product-badge--featured">Selected</span>
+            {% endif %}
+          </div>
+          <div class="product-body">
+            <p class="product-category">{{ product.category }}</p>
+            <h3 class="product-name">
+              <a href="/product/{{ product.id }}">{{ product.name }}</a>
+            </h3>
+            <p class="product-description">{{ product.description }}</p>
+            <div class="product-footer">
+              <span class="product-price">
+                <span class="product-price-currency">$</span>{{ "%.2f"|format(product.price) }}
+              </span>
+              {% if product.stock > 0 %}
+                <button
+                  class="btn btn-primary btn-sm add"
+                  data-id="{{ product.id }}"
+                  type="button">
+                  Add to basket
+                </button>
+              {% else %}
+                <button class="btn btn-disabled btn-sm" disabled type="button">Unavailable</button>
+              {% endif %}
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if other_articles %}
+  <section class="journal-more" aria-labelledby="journal-more-heading">
+    <div class="container">
+      <header class="section-header">
+        <div class="section-heading">
+          <p class="eyebrow">Continue reading</p>
+          <h2 id="journal-more-heading" class="journal-more-heading">
+            Other notes from the keeper
+          </h2>
+        </div>
+      </header>
+
+      <ul class="journal-more-list" role="list">
+        {% for other in other_articles %}
+        <li class="journal-more-item">
+          <a href="/journal/{{ other.slug }}" class="journal-more-link">
+            <p class="journal-more-eyebrow">{{ other.eyebrow }}</p>
+            <h3 class="journal-more-title">{{ other.title }}</h3>
+            <p class="journal-more-standfirst">{{ other.standfirst }}</p>
+            <p class="journal-more-meta">
+              {{ other.date_display }} · {{ other.reading_minutes }} min read
+            </p>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+  {% endif %}
+
+</article>
+
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}The Journal — {{ store.name }}{% endblock %}
+{% block description %}Notes from the keeper on inspection, curation, and the small ceremonies of a working shop.{% endblock %}
+{% block page_id %}journal{% endblock %}
+
+{% block content %}
+
+<section class="journal-hero" aria-labelledby="journal-heading">
+  <div class="container journal-hero-inner">
+    <p class="eyebrow">The Journal</p>
+    <h1 id="journal-heading" class="journal-hero-title">
+      Notes from the keeper.
+    </h1>
+    <p class="journal-hero-lede">
+      Occasional writing on the small decisions that shape a working shop —
+      how we choose what to keep, why we wrap every parcel by hand, and the
+      rules we have not broken since 2019.
+    </p>
+  </div>
+</section>
+
+<section class="journal-index" aria-label="Published notes">
+  <div class="container">
+    <ul class="journal-list" role="list">
+      {% for article in articles %}
+      <li class="journal-item">
+        <a class="journal-item-link" href="/journal/{{ article.slug }}">
+
+          <div class="journal-item-media" aria-hidden="true">
+            <img
+              src="{{ article.hero_image }}"
+              alt=""
+              loading="lazy"
+              width="800"
+              height="600">
+          </div>
+
+          <div class="journal-item-body">
+            <p class="journal-item-eyebrow">{{ article.eyebrow }}</p>
+            <h2 class="journal-item-title">{{ article.title }}</h2>
+            <p class="journal-item-standfirst">{{ article.standfirst }}</p>
+
+            <dl class="journal-item-meta">
+              <div>
+                <dt>Written</dt>
+                <dd>{{ article.date_display }}</dd>
+              </div>
+              <div>
+                <dt>Reading</dt>
+                <dd>{{ article.reading_minutes }} minutes</dd>
+              </div>
+              <div>
+                <dt>By</dt>
+                <dd>{{ article.author }}</dd>
+              </div>
+            </dl>
+
+            <span class="journal-item-cta">
+              Read the note
+              <span aria-hidden="true">→</span>
+            </span>
+          </div>
+
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="journal-closing" aria-label="Sign-off">
+  <div class="container journal-closing-inner">
+    <p class="journal-closing-mark" aria-hidden="true">◦</p>
+    <p class="journal-closing-text">
+      The Journal is written in the shop, between orders.
+      There is no schedule. There is only the moment a thing is worth saying.
+    </p>
+  </div>
+</section>
+
+{% endblock %}
