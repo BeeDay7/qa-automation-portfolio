@@ -19,7 +19,11 @@ They are deliberately simplified.
   when the process restarts. There is no database.
 - **No TLS.** Traffic is HTTP, not HTTPS. The session cookie is signed
   by `itsdangerous`, but transmitted in the clear.
-- **No rate limiting.** A client can send unlimited login attempts.
+- **Basic rate limiting only.** SecurePortal throttles an account after
+  five failed sign-ins in five minutes (HTTP 429). There is no per-client
+  limit, so guessing spread across many accounts is not slowed, and the
+  throttle can be used to lock a known user out for five minutes. The
+  storefront login is not throttled.
 - **No CSRF tokens.** The session cookie uses `SameSite=lax`, which
   protects against most cross-site attacks but is not a complete CSRF
   defence.
@@ -28,9 +32,15 @@ They are deliberately simplified.
 - **No password hashing.** Storefront and SecurePortal user records
   store plaintext passwords in `data.py`. This is a deliberate choice
   for a fixture. A production system would use `bcrypt` or `argon2`.
-- **No content security policy.** The storefront loads Google Fonts
-  from a CDN and uses inline styles. A production deployment would set
-  CSP headers and host the fonts locally.
+- **Content security policy allows inline styles.** Both fixtures send a
+  CSP that allows scripts only from their own origin, but `style-src`
+  includes `'unsafe-inline'` because the templates use inline style blocks,
+  and fonts load from Google Fonts. A production deployment would move the
+  styles into files and host the fonts locally.
+- **Sessions cannot be revoked server-side.** Sessions live in signed
+  cookies. Logout clears the browser's copy, but a copy captured before
+  logout stays valid until the secret key changes. No HSTS header is sent
+  because the fixtures run over plain HTTP.
 - **No GDPR or privacy controls.** There is no consent flow, no data
   export, no deletion mechanism. User records are static.
 
@@ -66,32 +76,31 @@ negative paths. It does not cover the following.
 
 ## Security-controls suite
 
-The `tests/security` suite covers authentication feedback and one
-server-side role boundary. It is **not a penetration test**.
+The `tests/security` suite (20 tests) checks specific controls: role
+boundaries on three endpoints, account-enumeration resistance, login
+throttling, logout, cookie flags, security headers, caching, security
+logging, object-level access control and a stored-XSS regression. Each test
+cites the OWASP ASVS requirement it verifies. It is **not a penetration
+test**.
 
-- **UI-level assertions.** `SEC-001` and `SEC-002` verify what the user
-  sees after login attempts. They do not test the authentication logic
-  itself.
-- **One role boundary.** `SEC-003` through `SEC-005` verify that the
-  `/api/admin/records` endpoint enforces `role=admin`. They do not test
-  other endpoints, other roles, or privilege escalation paths.
+- **Controls, not coverage.** Each test checks that one control behaves as
+  designed. The suite does not search for unknown vulnerabilities; the
+  OWASP ZAP baseline scan in CI is a passive scan, not an active attack.
 - **No transport-layer testing.** No HTTPS, no HSTS, no certificate
   pinning.
-- **No session-fixation testing.** The session ID is not rotated on
-  login. Whether this is exploitable is not tested.
-- **No CSRF testing.** Whether the login form is vulnerable to a
-  cross-site request forgery attack is not tested.
-- **No rate-limit testing.** Whether brute-force login attempts are
-  throttled is not tested.
+- **No CSRF testing.** The cookies use `SameSite`, but there are no CSRF
+  tokens and no test of cross-site request forgery.
+- **Limited session testing.** Logout is tested; replay of a session
+  cookie captured before logout is not prevented (see Fixtures above).
 - **No password-storage testing.** Passwords are stored plaintext in
-  the fixture source; the suite does not verify this, and a production
-  system would not do it.
-- **No fuzzing.** No malformed inputs, no boundary values, no injection
-  attempts.
+  the fixture source; a production system would hash them.
+- **No fuzzing.** Only targeted payloads are used (one XSS payload, wrong
+  passwords); there is no systematic fuzzing of inputs.
 
-A real security assessment requires an authorised scope, a documented
-methodology, evidence chains, severity ratings, remediation guidance,
-and retest confirmation. This suite has none of those.
+The review behind these tests is written up in
+[`SECURITY_REVIEW.md`](SECURITY_REVIEW.md), with findings, severity,
+reproduction steps, fixes and the test that verifies each fix. It is a
+review of practice fixtures, not an authorised assessment of a real system.
 
 ---
 
