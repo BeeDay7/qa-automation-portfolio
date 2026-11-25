@@ -24,6 +24,9 @@ ${VIEWER_USER}       qa_viewer
 ${VIEWER_PASS}       ViewerOnly!234
 ${BAD_USER}          attacker
 ${BAD_PASS}          wrong-password
+${AUDITOR_USER}      qa_auditor
+${AUDITOR_PASS}      AuditOnly!234
+${XSS_PAYLOAD}       <img src=x data-probe=1 alt=xss-probe>
 ${CHROME_OPTIONS}    add_argument("--headless=new");add_argument("--no-sandbox");add_argument("--disable-dev-shm-usage");add_argument("--disable-gpu");add_argument("--window-size=1920,1080")
 
 *** Test Cases ***
@@ -76,13 +79,6 @@ SEC-005 Admin API Succeeds For Admin Session
     ${resp}=    GET On Session    admin    /api/admin/records    expected_status=200
     Should Be Equal As Integers    ${resp.json()}[count]    3
 
-*** Keywords ***
-Open Secure Portal
-    Open Browser    ${SECURE_URL}    chrome    options=${CHROME_OPTIONS}
-    Maximize Browser Window
-    Set Selenium Implicit Wait    5s
-    Wait Until Element Is Visible    id=signin    timeout=5s
-
 SEC-006 Admin Session Can Read Auth Log
     [Documentation]    A server-side admin session receives HTTP 200 from
     ...                the /api/auth/log endpoint.
@@ -103,3 +99,57 @@ SEC-007 Viewer Session Is Refused The Auth Log
     ...    expected_status=200
     ${resp}=    GET On Session    viewer_log    /api/auth/log    expected_status=403
     Should Be Equal    ${resp.json()}[error]    forbidden
+
+SEC-008 Auditor Session Can Read Auth Log
+    [Documentation]    The auditor role is allowed to read the auth log.
+    ...                ASVS V4.1.1 (access control enforced server-side).
+    [Tags]    api    priority-medium
+    Create Session    auditor_log    ${SECURE_URL}    verify=False
+    ${login}=    POST On Session    auditor_log    /api/login
+    ...    json=${{ {"username": "${AUDITOR_USER}", "password": "${AUDITOR_PASS}"} }}
+    ...    expected_status=200
+    ${resp}=    GET On Session    auditor_log    /api/auth/log    expected_status=200
+    Should Be True    ${resp.json()}[count] >= 1
+
+SEC-009 Auditor Session Is Refused Admin Records
+    [Documentation]    Least privilege: the auditor can read the log but not
+    ...                the restricted admin records. ASVS V4.1.3.
+    [Tags]    api    negative    priority-high
+    Create Session    auditor_rec    ${SECURE_URL}    verify=False
+    ${login}=    POST On Session    auditor_rec    /api/login
+    ...    json=${{ {"username": "${AUDITOR_USER}", "password": "${AUDITOR_PASS}"} }}
+    ...    expected_status=200
+    ${resp}=    GET On Session    auditor_rec    /api/admin/records    expected_status=403
+    Should Be Equal    ${resp.json()}[error]    forbidden
+
+SEC-010 Auth Log Renders Hostile Usernames As Text
+    [Documentation]    Regression test for a stored XSS found during review
+    ...                (CWE-79, ASVS V5.3.3). An anonymous login attempt with an
+    ...                HTML payload as the username is written to the auth log.
+    ...                The admin dashboard must show the payload as text and
+    ...                must not create the injected element.
+    [Tags]    xss    regression    priority-high
+    Create Session    hostile    ${SECURE_URL}    verify=False
+    ${resp}=    POST On Session    hostile    /api/login
+    ...    json=${{ {"username": "${XSS_PAYLOAD}", "password": "x"} }}
+    ...    expected_status=401
+    Input Text        id=username    ${ADMIN_USER}
+    Input Password    id=password    ${ADMIN_PASS}
+    Click Safely      id=signin
+    Wait Until Location Contains    /dashboard    timeout=5s
+    Click Safely      id=refresh-log
+    Wait Until Element Contains    id=log-body    xss-probe    timeout=5s
+    Page Should Not Contain Element    css=#log-body img[data-probe]
+    Element Should Contain    id=log-body    <img
+    [Teardown]    Sign Out Of Secure Portal
+
+*** Keywords ***
+Open Secure Portal
+    Open Browser    ${SECURE_URL}    chrome    options=${CHROME_OPTIONS}
+    Maximize Browser Window
+    Set Selenium Implicit Wait    5s
+    Wait Until Element Is Visible    id=signin    timeout=5s
+
+Sign Out Of Secure Portal
+    Execute Javascript    fetch("/api/logout", {method: "POST", credentials: "same-origin"})
+    Delete All Cookies
