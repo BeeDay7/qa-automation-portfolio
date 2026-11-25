@@ -75,14 +75,14 @@ jobs:
           python scripts/serve_fixtures.py --background
           sleep 4
       - name: ZAP baseline — SecurePortal
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: http://127.0.0.1:8002
           allow_issue_writing: false
           fail_action: false
           artifact_name: zap-secureportal
       - name: ZAP baseline — Azam Trading Store
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: http://127.0.0.1:8001
           allow_issue_writing: false
