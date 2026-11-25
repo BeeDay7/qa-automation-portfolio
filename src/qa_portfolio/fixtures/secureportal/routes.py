@@ -9,6 +9,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
+from qa_portfolio.security import LoginThrottle
+
 from .data import ADMIN_RECORDS, AUTH_LOG, USERS, record_auth_event
 
 BASE_DIR = Path(__file__).parent
@@ -18,6 +20,9 @@ router = APIRouter()
 USER_KEY = "user"
 ROLE_KEY = "role"
 NAME_KEY = "display_name"
+
+#: Five failed sign-ins per account within five minutes trigger throttling.
+THROTTLE = LoginThrottle(max_failures=5, window_seconds=300)
 
 
 class LoginBody(BaseModel):
@@ -52,9 +57,22 @@ async def session(request: Request) -> JSONResponse:
 
 @router.post("/api/login")
 async def login(request: Request, body: LoginBody) -> JSONResponse:
+    if THROTTLE.is_throttled(body.username):
+        record_auth_event(
+            username=body.username,
+            outcome="denied",
+            reason="throttled",
+        )
+        return JSONResponse(
+            {"error": "too_many_attempts"},
+            status_code=429,
+            headers={"Retry-After": str(THROTTLE.retry_after(body.username))},
+        )
+
     record = USERS.get(body.username)
 
     if record is None:
+        THROTTLE.record_failure(body.username)
         record_auth_event(
             username=body.username,
             outcome="denied",
@@ -63,6 +81,7 @@ async def login(request: Request, body: LoginBody) -> JSONResponse:
         return JSONResponse({"error": "invalid_credentials"}, status_code=401)
 
     if record["password"] != body.password:
+        THROTTLE.record_failure(body.username)
         record_auth_event(
             username=body.username,
             outcome="denied",
@@ -70,6 +89,8 @@ async def login(request: Request, body: LoginBody) -> JSONResponse:
         )
         return JSONResponse({"error": "invalid_credentials"}, status_code=401)
 
+    THROTTLE.record_success(body.username)
+    request.session.clear()
     request.session[USER_KEY] = body.username
     request.session[ROLE_KEY] = record["role"]
     request.session[NAME_KEY] = record["name"]

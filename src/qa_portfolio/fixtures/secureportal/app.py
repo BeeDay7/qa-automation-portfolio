@@ -10,6 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from qa_portfolio.config import SECUREPORTAL
 from qa_portfolio.logging_config import configure_logging
+from qa_portfolio.security import SecurityHeadersMiddleware
 
 from .routes import router
 
@@ -29,5 +30,6 @@ app.add_middleware(
     same_site="strict",
     https_only=False,
 )
+app.add_middleware(SecurityHeadersMiddleware)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.include_router(router)
