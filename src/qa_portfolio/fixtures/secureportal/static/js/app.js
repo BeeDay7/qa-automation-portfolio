@@ -8,6 +8,11 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  /* Encode server-provided text before it is placed into innerHTML.
+     Usernames in the auth log come from untrusted login attempts. */
+  const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+
   const api = async (path, options = {}) => {
     const res = await fetch(path, {
       headers: { "Content-Type": "application/json" },
@@ -80,14 +85,14 @@
 
     tbody.innerHTML = items.map((item) => `
       <tr>
-        <td>${item.id}</td>
-        <td>${item.title}</td>
+        <td>${esc(item.id)}</td>
+        <td>${esc(item.title)}</td>
         <td>
-          <span class="classification-tag" data-level="${item.classification}">
-            ${item.classification}
+          <span class="classification-tag" data-level="${esc(item.classification)}">
+            ${esc(item.classification)}
           </span>
         </td>
-        <td>${item.updated.replace("T", " ").replace("Z", " UTC")}</td>
+        <td>${esc(String(item.updated).replace("T", " ").replace("Z", " UTC"))}</td>
       </tr>
     `).join("");
   };
@@ -103,15 +108,15 @@
 
     body.innerHTML = events.map((event) => {
       const detail = event.role
-        ? `role: ${event.role}`
+        ? `role: ${esc(event.role)}`
         : event.reason
-          ? `reason: ${event.reason}`
+          ? `reason: ${esc(event.reason)}`
           : "—";
       return `
         <div class="log-row">
-          <span class="log-time">${event.timestamp}</span>
-          <span class="log-user">${event.username}</span>
-          <span class="log-outcome" data-outcome="${event.outcome}">${event.outcome}</span>
+          <span class="log-time">${esc(event.timestamp)}</span>
+          <span class="log-user">${esc(event.username)}</span>
+          <span class="log-outcome" data-outcome="${esc(event.outcome)}">${esc(event.outcome)}</span>
           <span class="log-detail">${detail}</span>
         </div>`;
     }).join("");
