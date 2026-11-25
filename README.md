@@ -7,13 +7,20 @@
 [![FastAPI](https://img.shields.io/badge/fastapi-0.115%2B-009688.svg)](https://fastapi.tiangolo.com/)
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![Tests](https://img.shields.io/badge/tests-32%20passing-brightgreen.svg)](#test-inventory)
+[![Tests](https://img.shields.io/badge/tests-58%20passing-brightgreen.svg)](#test-inventory)
+[![Security: OWASP ASVS](https://img.shields.io/badge/security%20tests-OWASP%20ASVS%20mapped-8A2BE2.svg)](docs/SECURITY_REVIEW.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 A reproducible, self-directed portfolio demonstrating professional
 test-automation practice across **UI**, **security-controls**, and **API**
-layers. Three FastAPI fixtures. Three Robot Framework suites. A single CI
-pipeline that runs everything on every push.
+layers. Three FastAPI fixtures. Three Robot Framework suites with 58 tests.
+A single CI pipeline that runs everything on every push, plus a dependency
+audit and an OWASP ZAP baseline scan.
+
+**Security review:** a review of the fixtures found a **stored cross-site
+scripting flaw** in the SecurePortal admin dashboard. It is documented, fixed
+and covered by a regression test, together with nine further controls mapped
+to OWASP ASVS. See [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md).
 
 **Author:** Abidemi Kuburat Adedeji
 **Co-founder:** Sulaiman Oluwasegun Yusuff
@@ -28,7 +35,7 @@ Reviewers who evaluate test automation for quality engineering
 engagements look for four things. This repository delivers each of them.
 
 **A working test suite against a realistic target.** Not a `console.log`
-demo, not a single Selenium script. Three suites totalling thirty-two
+demo, not a single Selenium script. Three suites totalling fifty-eight
 tests, running against three purpose-built FastAPI fixtures with
 server-side state, signed session cookies, typed Pydantic models, and
 OpenAPI documentation.
@@ -96,8 +103,8 @@ test target.
               ▼                        ▼                        ▼
        ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
        │  tests/ui    │         │ tests/       │         │  tests/api   │
-       │  20 tests    │         │ security     │         │  7 tests     │
-       │  Selenium    │         │ 5 tests      │         │  Requests    │
+       │  31 tests    │         │ security     │         │  7 tests     │
+       │  Selenium    │         │ 20 tests     │         │  Requests    │
        │  Page objects│         │ Selenium +   │         │  Contract    │
        │  YAML data   │         │ Requests     │         │  testing     │
        └──────────────┘         └──────────────┘         └──────────────┘
@@ -116,52 +123,51 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full rationale.
 
 | Layer | Evidence |
 | --- | --- |
-| **UI automation** | Page-object model, YAML-driven test data, session isolation, tagged suites, 20 functional tests |
-| **Security controls** | Server-side role enforcement, admin/viewer boundary tests, HTTP 403 verification |
+| **UI automation** | Page-object model, YAML-driven test data, session isolation, tagged suites, 31 functional tests |
+| **Security controls** | Role-based access, IDOR protection, brute-force throttling, cookie flags, CSP and security headers, security logging: 20 tests mapped to OWASP ASVS |
+| **Security review** | Stored XSS found, fixed and regression-tested; findings written up as a report |
 | **API contract** | Typed OpenAPI endpoints, health check, filters, detail, structured 404s |
 | **Custom libraries** | `DataLoader`, `ApiClient`, `EvidenceHelper` — typed, documented, reusable |
-| **CI** | GitHub Actions matrix across three suites with artefact upload |
+| **CI** | GitHub Actions matrix across three suites with artefact upload; `pip-audit` dependency audit; OWASP ZAP baseline scan |
 | **Engineering** | `ruff`, `mypy --strict`, pre-commit, `.editorconfig`, VS Code workspace config |
-| **Documentation** | `SETUP`, `ARCHITECTURE`, `LIMITATIONS`, `DESIGN` — four documents covering four audiences |
+| **Documentation** | `SETUP`, `ARCHITECTURE`, `SECURITY_REVIEW`, `LIMITATIONS`, `DESIGN` — five documents, each for a different reader |
 | **Design** | Merchant-house visual language, custom SVG illustrations, editorial voice |
 
 ---
 
 ## Quick start
 
-```powershell
-# 1. Clone and enter
+You need Python 3.11+ and Google Chrome. The same commands work in PowerShell, macOS and Linux:
+
+```bash
 git clone https://github.com/BeeDay7/qa-automation-portfolio.git
 cd qa-automation-portfolio
-
-# 2. Create the virtual environment
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-
-# 3. Install dependencies
-python -m pip install --upgrade pip
+# Windows:      .venv\Scripts\Activate.ps1
+# macOS/Linux:  source .venv/bin/activate
 pip install -r requirements-dev.txt -e ".[dev]"
 
-# 4. Install the pre-commit hooks
-pre-commit install
+python scripts/run_all.py
+```
 
-# 5. Start the fixtures
-python scripts/serve_fixtures.py --background
-Start-Sleep -Seconds 3
+`run_all.py` starts the three fixtures, waits until they answer, runs the UI,
+security and API suites, stops the fixtures and prints a summary with a link to
+each report (`evidence/<suite>/report.html`). It exits non-zero if any test
+fails. To run only some suites: `python scripts/run_all.py security api`.
 
-# 6. Run the suites
+<details>
+<summary>Step by step instead</summary>
+
+```bash
+python scripts/serve_fixtures.py --background     # start the fixtures
 robot --outputdir evidence/ui       tests/ui
 robot --outputdir evidence/security tests/security
 robot --outputdir evidence/api      tests/api
-
-# 7. Inspect the reports
-start evidence\ui\report.html
-start evidence\security\report.html
-start evidence\api\report.html
-
-# 8. Stop the fixtures
-python scripts/serve_fixtures.py --stop
+python scripts/serve_fixtures.py --stop           # stop the fixtures
+pre-commit install                                # optional: lint on every commit
 ```
+
+</details>
 
 End-to-end setup with troubleshooting: [`docs/SETUP.md`](docs/SETUP.md).
 
@@ -195,9 +201,9 @@ These are documented in the fixtures' source code. They are not secrets.
 
 ## Test inventory
 
-Thirty-two tests across three suites, all passing on every push.
+Fifty-eight tests across three suites, all passing on every push.
 
-### `tests/ui` — Functional UI (20 tests)
+### `tests/ui` — Functional UI (31 tests)
 
 Browser-driven tests against the Azam Trading Store storefront using
 SeleniumLibrary with a page-object model.
@@ -224,20 +230,49 @@ SeleniumLibrary with a page-object model.
 | DM-018 | Journal link present in header on every page | navigation |
 | DM-019 | Header journal link navigates from home | navigation |
 | DM-020 | Footer links reach all primary pages | navigation |
+| DM-021 | Contact page renders form and information | smoke, contact |
+| DM-022 | Contact form submits successfully | smoke, contact |
+| DM-023 | Contact form rejects empty name | negative, contact |
+| DM-024 | Admin inbox shows submitted contact messages | smoke, admin, contact |
+| DM-025 | Inbox is hidden from non-admin sessions | negative, admin |
+| DM-026 | Inbox API rejects anonymous callers | api, negative, admin |
+| DM-027 | Checkout redirects to order confirmation | smoke, checkout, order |
+| DM-028 | Order confirmation shows multiple items and combined total | order |
+| DM-029 | Order appears in account ledger | order, account |
+| DM-030 | Order page is not visible to a different session | negative, order |
+| DM-031 | Checkout with empty cart shows message | negative, checkout |
 
-### `tests/security` — Authentication controls (5 tests)
+### `tests/security` — Security controls (20 tests)
 
-UI feedback and one server-side role boundary for the SecurePortal
-fixture. This is a UI-level check, not a penetration test — see
+Two files. `auth_controls.robot` checks authentication and role boundaries
+through the UI and the API. `hardening.robot` checks the controls added after
+the security review, each mapped to an OWASP ASVS 4.0.3 requirement or an
+OWASP WSTG test. These are control checks, not a penetration test — see
+[`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) and
 [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
 
-| ID | Scenario |
-| --- | --- |
-| SEC-001 | Invalid credentials are rejected in the UI |
-| SEC-002 | Admin login succeeds and reaches /dashboard |
-| SEC-003 | Viewer role is refused by the admin API (403) |
-| SEC-004 | Anonymous access to admin API is forbidden (403) |
-| SEC-005 | Admin session is granted access to admin API (200) |
+| ID | Scenario | Reference |
+| --- | --- | --- |
+| SEC-001 | Invalid credentials are rejected in the UI | — |
+| SEC-002 | Admin login succeeds and reaches /dashboard | — |
+| SEC-003 | Viewer role is refused by the admin API (403) | ASVS V4.1.1 |
+| SEC-004 | Anonymous access to admin API is forbidden (403) | ASVS V4.1.1 |
+| SEC-005 | Admin session is granted access to admin API (200) | — |
+| SEC-006 | Admin session can read the auth log | ASVS V7.2.1 |
+| SEC-007 | Viewer session is refused the auth log (403) | ASVS V4.1.1 |
+| SEC-008 | Auditor session can read the auth log | ASVS V4.1.1 |
+| SEC-009 | Auditor session is refused admin records (least privilege) | ASVS V4.1.3 |
+| SEC-010 | Auth log renders hostile usernames as text (stored XSS regression) | ASVS V5.3.3, CWE-79 |
+| SEC-011 | Login does not reveal whether an account exists | WSTG-IDNT-04 |
+| SEC-012 | Repeated failed logins are throttled (429 + Retry-After) | ASVS V2.2.1 |
+| SEC-013 | Throttling applies per account | ASVS V2.2.1 |
+| SEC-014 | Logout ends the session | ASVS V3.3.1 |
+| SEC-015 | Session cookie is HttpOnly and SameSite=Strict | ASVS V3.4.2, V3.4.3 |
+| SEC-016 | Pages send CSP, nosniff, anti-framing and referrer headers | ASVS V14.4.3, V14.4.4, V14.4.6, V14.4.7 |
+| SEC-017 | API responses are not cached | ASVS V8.2.1 |
+| SEC-018 | Failed and throttled logins are logged | ASVS V7.2.1 |
+| SEC-019 | Order receipts are private to the buyer (IDOR) | ASVS V4.2.1 |
+| SEC-020 | Contact inbox is restricted to admins | ASVS V4.1.1 |
 
 ### `tests/api` — Contract and regression (7 tests)
 
@@ -304,10 +339,14 @@ qa-automation-portfolio/
 │   ├── ARCHITECTURE.md               Design rationale
 │   ├── DESIGN.md                     Visual and editorial decisions
 │   ├── LIMITATIONS.md                Honest scope statement
+│   ├── SECURITY_REVIEW.md            Findings, fixes and verification
 │   └── SETUP.md                      End-to-end setup walkthrough
-├── scripts/serve_fixtures.py         One-command launcher for the three fixtures
+├── scripts/
+│   ├── run_all.py                    One command: fixtures up, all suites, fixtures down
+│   └── serve_fixtures.py             Start or stop the three fixtures
 ├── src/qa_portfolio/
 │   ├── config.py                     Typed runtime configuration
+│   ├── security.py                   Security headers and login throttling
 │   ├── logging_config.py             Structured logging
 │   ├── fixtures/
 │   │   ├── storefront/               Azam Trading Store (HTML + JSON)
@@ -316,9 +355,9 @@ qa-automation-portfolio/
 │   └── libraries/                    Custom Robot Framework libraries
 ├── tests/
 │   ├── ui/                           UI suite (page objects, YAML data)
-│   ├── security/                     Authentication-control suite
+│   ├── security/                     Security-control suites (ASVS-mapped)
 │   └── api/                          API contract suite
-├── Makefile                          make install / test / evidence / clean
+├── Makefile                          make all / install / test / evidence / clean
 ├── pyproject.toml                    Ruff + mypy strict configuration
 ├── requirements.txt                  Runtime dependencies
 └── requirements-dev.txt              Runtime + dev dependencies
@@ -328,7 +367,7 @@ qa-automation-portfolio/
 
 ## Documentation
 
-Four documents, each written for a different reader.
+Five documents, each written for a different reader.
 
 - [`docs/SETUP.md`](docs/SETUP.md) — end-to-end setup walkthrough with
   troubleshooting. For the first-time runner.
@@ -340,6 +379,10 @@ Four documents, each written for a different reader.
 - [`docs/DESIGN.md`](docs/DESIGN.md) — the palette, the typography, the
   editorial voice, the accessibility decisions. For the reviewer who
   wants to know how the author thinks.
+
+- [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) — six findings from a
+  code review of the fixtures against OWASP ASVS, each with reproduction
+  steps, the fix and the test that proves it. For the security reviewer.
 
 - [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) — what this portfolio is
   not. What it does not cover. What would need to be true for it to

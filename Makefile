@@ -1,10 +1,11 @@
-.PHONY: help install install-dev fixtures fixtures-bg stop test test-ui test-sec test-api lint format type evidence clean
+.PHONY: help all install install-dev fixtures fixtures-bg stop test test-ui test-sec test-api lint format type evidence clean
 
 PY ?= python
 VENV_BIN := .venv/Scripts
 VENV_BIN_UNIX := .venv/bin
 
 help:
+	@echo "all           One command: start fixtures, run every suite, stop"
 	@echo "install       Create venv and install runtime deps"
 	@echo "install-dev   Install runtime + dev deps"
 	@echo "fixtures      Run fixture servers in foreground"
@@ -38,6 +39,9 @@ fixtures-bg:
 
 stop:
 	$(PY) scripts/serve_fixtures.py --stop
+
+all:
+	$(PY) scripts/run_all.py
 
 test: test-ui test-sec test-api
 
