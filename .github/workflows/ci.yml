@@ -18,6 +18,10 @@ jobs:
       - run: pip install -e ".[dev,test]"
       - run: ruff check src tests scripts
       - run: mypy src
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
 
   robot:
     name: Robot suites (${{ matrix.suite }})
@@ -49,6 +53,41 @@ jobs:
           name: robot-evidence-${{ matrix.suite }}
           path: evidence/${{ matrix.suite }}
           retention-days: 30
+      - name: Stop fixtures
+        if: always()
+        run: python scripts/serve_fixtures.py --stop
+
+  zap-baseline:
+    name: OWASP ZAP baseline scan
+    runs-on: ubuntu-latest
+    needs: quality
+    # Passive scan for reporting only; findings are reviewed, not gating.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -e .
+      - name: Start fixtures
+        run: |
+          python scripts/serve_fixtures.py --background
+          sleep 4
+      - name: ZAP baseline — SecurePortal
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: http://127.0.0.1:8002
+          allow_issue_writing: false
+          fail_action: false
+          artifact_name: zap-secureportal
+      - name: ZAP baseline — Azam Trading Store
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: http://127.0.0.1:8001
+          allow_issue_writing: false
+          fail_action: false
+          artifact_name: zap-storefront
       - name: Stop fixtures
         if: always()
         run: python scripts/serve_fixtures.py --stop
